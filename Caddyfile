@@ -1,0 +1,90 @@
+# Caddyfile - Dashboard Personal Ivan Tintore
+# Todas las apps unificadas bajo un mismo dominio con autenticación
+
+:80 {
+    # HTTP Basic Auth
+    # Usuario: admin
+    # Password: demo123 (cambiar en producción)
+    basicauth {
+        admin $2a$14$0A0wdqJvTNRbaqt5fPawougejOlBJUtKmY87x5K.p0J/e6otaZ8Fy
+    }
+
+    # Health check sin auth (para monitoreo)
+    @health path /health
+    handle @health {
+        respond "OK" 200
+    }
+
+    # ========== APPS PRIVADAS ==========
+    
+    # Conversor HEIF - FastAPI
+    handle_path /conversor/* {
+        reverse_proxy conversor:8000
+    }
+    redir /conversor /conversor/ permanent
+
+    # AEAT API - FastAPI
+    handle_path /aeat/* {
+        reverse_proxy aeat-api:8000
+    }
+    redir /aeat /aeat/ permanent
+
+    # AEAT Dashboard - Streamlit
+    handle_path /aeat-ui/* {
+        reverse_proxy aeat-dashboard:8501
+    }
+    redir /aeat-ui /aeat-ui/ permanent
+
+    # Intrastat Manager - Node serve
+    handle_path /intrastat/* {
+        reverse_proxy intrastat:3001
+    }
+    redir /intrastat /intrastat/ permanent
+
+    # Taxi Management - Node + SQLite
+    handle_path /taxi/* {
+        reverse_proxy taxi:3003
+    }
+    redir /taxi /taxi/ permanent
+
+    # Adela Finanzas - Node + SQLite
+    handle_path /adela/* {
+        reverse_proxy adela:3002
+    }
+    redir /adela /adela/ permanent
+
+    # Toroidal Propellers - Flask
+    handle_path /toroidal/* {
+        reverse_proxy toroidal:5001
+    }
+    redir /toroidal /toroidal/ permanent
+
+    # Flower Monitor - Celery
+    handle_path /flower/* {
+        reverse_proxy aeat-flower:5555
+    }
+    redir /flower /flower/ permanent
+
+    # ========== DASHBOARD (default) ==========
+    handle {
+        reverse_proxy dashboard-web:3000
+    }
+
+    # Logs
+    log {
+        output stdout
+        format console
+    }
+}
+
+# ========== PRODUCCIÓN ==========
+# Descomentar cuando esté listo para desplegar
+# dashboard.ivantintore.com {
+#     # SSL automático con Let's Encrypt
+#     
+#     basicauth {
+#         admin {env.DASHBOARD_PASSWORD_HASH}
+#     }
+#     
+#     # Mismas rutas que arriba...
+# }

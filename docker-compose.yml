@@ -1,0 +1,97 @@
+# Docker Compose - PoC Dashboard Personal
+# Ivan Tintore
+# 
+# Uso:
+#   docker-compose up -d
+#   
+# Acceso:
+#   http://localhost
+#   Usuario: admin
+#   Password: demo123
+
+version: '3.8'
+
+services:
+  # ============================================
+  # CADDY - Reverse Proxy + Auth + SSL
+  # ============================================
+  caddy:
+    image: caddy:2-alpine
+    container_name: poc-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - dashboard-web
+      - conversor
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # DASHBOARD WEB - Astro (Landing + Grid)
+  # ============================================
+  dashboard-web:
+    build:
+      context: ./dashboard-web
+      dockerfile: Dockerfile
+    container_name: poc-dashboard-web
+    restart: unless-stopped
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # CONVERSOR HEIF - FastAPI
+  # ============================================
+  conversor:
+    build:
+      context: ./apps/conversor-heif
+      dockerfile: Dockerfile
+    container_name: poc-conversor
+    restart: unless-stopped
+    volumes:
+      - conversor_uploads:/app/uploads
+      - conversor_temp:/app/temp
+    networks:
+      - backend
+    environment:
+      - ENVIRONMENT=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# ============================================
+# NETWORKS
+# ============================================
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+# ============================================
+# VOLUMES
+# ============================================
+volumes:
+  caddy_data:
+  caddy_config:
+  conversor_uploads:
+  conversor_temp:
+

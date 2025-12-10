@@ -1,0 +1,428 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Configuración de todas las aplicaciones
+const apps = [
+  {
+    id: 'conversor',
+    name: 'Conversor HEIF',
+    description: 'Convierte imágenes HEIF/HEIC y PDF a JPG',
+    icon: '🖼️',
+    url: '/tools/conversor/',
+    tech: 'FastAPI + Python',
+    color: '#0070f3',
+    active: true
+  },
+  {
+    id: 'aeat',
+    name: 'AEAT Notificaciones',
+    description: 'Automatización de notificaciones tributarias',
+    icon: '📊',
+    url: '/tools/aeat/',
+    tech: 'FastAPI + Streamlit + Celery',
+    color: '#e74c3c',
+    active: true
+  },
+  {
+    id: 'intrastat',
+    name: 'Intrastat Manager',
+    description: 'Procesa archivos Intrastat para AEAT',
+    icon: '📦',
+    url: '/tools/intrastat/',
+    tech: 'JavaScript + Node.js',
+    color: '#27ae60',
+    active: true
+  },
+  {
+    id: 'taxi',
+    name: 'Taxi Management',
+    description: 'Gestión de jornadas y liquidaciones',
+    icon: '🚕',
+    url: '/tools/taxi/',
+    tech: 'Node.js + SQLite',
+    color: '#f39c12',
+    active: true
+  },
+  {
+    id: 'adela',
+    name: 'Adela Finanzas',
+    description: 'Procesamiento de extractos bancarios',
+    icon: '💰',
+    url: '/tools/adela/',
+    tech: 'Node.js + SQLite',
+    color: '#9b59b6',
+    active: true
+  },
+  {
+    id: 'toroidal',
+    name: 'Toroidal Propellers',
+    description: 'Generador de hélices toroidales',
+    icon: '🔧',
+    url: '/tools/toroidal/',
+    tech: 'Flask + Python',
+    color: '#3498db',
+    active: true
+  }
+];
+
+// Apps públicas (GitHub)
+const publicApps = [
+  {
+    id: 'juegos',
+    name: 'Juegos Clásicos',
+    description: 'Tetris y más juegos retro',
+    icon: '🎮',
+    url: 'https://github.com/ivantintore/juegos-clasicos',
+    tech: 'Python + Pygame',
+    color: '#e91e63',
+    active: true,
+    external: true
+  },
+  {
+    id: 'curso',
+    name: 'Curso Pascal → IA',
+    description: 'De Pascal a IA Moderna',
+    icon: '📚',
+    url: 'https://github.com/ivantintore/De-Pascal-a-IA-Moderna-Curso-Completo',
+    tech: 'HTML Interactivo',
+    color: '#00bcd4',
+    active: true,
+    external: true
+  }
+];
+---
+
+<Layout title="Dashboard Personal - Ivan Tintore">
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">🏠</span>
+        <h1>Dashboard Personal</h1>
+      </div>
+      <div class="user-info">
+        <span class="user-name">Ivan Tintore</span>
+        <span class="user-badge">CEO MAITSA</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <section class="welcome">
+        <h2>Bienvenido, Ivan</h2>
+        <p>Tus herramientas de trabajo, siempre disponibles desde cualquier lugar.</p>
+      </section>
+
+      <!-- Private Apps Grid -->
+      <section class="apps-section">
+        <h3 class="section-title">🔒 Aplicaciones Privadas</h3>
+        <div class="apps-grid">
+          {apps.map((app) => (
+            <a href={app.url} class={`app-card ${!app.active ? 'placeholder' : ''}`} style={`--card-accent: ${app.color}`}>
+              <div class="app-icon">{app.icon}</div>
+              <div class="app-content">
+                <h4 class="app-name">{app.name}</h4>
+                <p class="app-description">{app.description}</p>
+              </div>
+              <div class="app-footer">
+                <span class="app-tech">{app.tech}</span>
+                <span class="app-status" title={app.active ? "Running" : "Coming soon"}>
+                  {app.active ? '🟢' : '⏳'}
+                </span>
+              </div>
+              <div class="app-arrow">→</div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <!-- Public Projects -->
+      <section class="apps-section">
+        <h3 class="section-title">🌍 Proyectos Públicos (GitHub)</h3>
+        <div class="apps-grid">
+          {publicApps.map((app) => (
+            <a href={app.url} target="_blank" rel="noopener" class="app-card external" style={`--card-accent: ${app.color}`}>
+              <div class="app-icon">{app.icon}</div>
+              <div class="app-content">
+                <h4 class="app-name">{app.name}</h4>
+                <p class="app-description">{app.description}</p>
+              </div>
+              <div class="app-footer">
+                <span class="app-tech">{app.tech}</span>
+                <span class="app-status" title="GitHub">🔗</span>
+              </div>
+              <div class="app-arrow">↗</div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <!-- Quick Links -->
+      <section class="quick-links">
+        <h3 class="section-title">⚡ Accesos Rápidos</h3>
+        <div class="links-grid">
+          <a href="https://sexyfly-reservas.vercel.app" target="_blank" class="quick-link">
+            <span>✈️</span> SexyFly Reservas
+          </a>
+          <a href="https://github.com/ivantintore" target="_blank" class="quick-link">
+            <span>🐙</span> GitHub Profile
+          </a>
+          <a href="/tools/flower/" class="quick-link">
+            <span>🌸</span> Flower Monitor
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Dashboard Personal v2.0 • MAITSA • {new Date().getFullYear()}</p>
+    </footer>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    font-size: 2rem;
+  }
+
+  .logo h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-name {
+    font-weight: 500;
+  }
+
+  .user-badge {
+    background: var(--accent);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Main */
+  .main {
+    flex: 1;
+  }
+
+  .welcome {
+    margin-bottom: 40px;
+  }
+
+  .welcome h2 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .welcome p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+  }
+
+  /* Apps Section */
+  .apps-section {
+    margin-bottom: 50px;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  /* App Card */
+  .app-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .app-card:not(.placeholder):hover {
+    transform: translateY(-4px);
+    border-color: var(--card-accent, var(--accent));
+    box-shadow: 0 10px 40px rgba(0, 112, 243, 0.15);
+  }
+
+  .app-card.placeholder {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .app-card.external {
+    border-style: dashed;
+  }
+
+  .app-icon {
+    font-size: 2.5rem;
+  }
+
+  .app-content {
+    flex: 1;
+  }
+
+  .app-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .app-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .app-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .app-tech {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .app-status {
+    font-size: 0.9rem;
+  }
+
+  .app-arrow {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: all 0.2s ease;
+  }
+
+  .app-card:not(.placeholder):hover .app-arrow {
+    opacity: 1;
+    right: 20px;
+    color: var(--card-accent, var(--accent));
+  }
+
+  /* Quick Links */
+  .quick-links {
+    margin-bottom: 40px;
+  }
+
+  .links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .quick-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+  }
+
+  .quick-link:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 30px 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .apps-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .welcome h2 {
+      font-size: 1.5rem;
+    }
+
+    .links-grid {
+      flex-direction: column;
+    }
+
+    .quick-link {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

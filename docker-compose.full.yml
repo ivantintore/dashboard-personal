@@ -1,0 +1,265 @@
+# docker-compose.full.yml - Dashboard Personal COMPLETO
+# Ivan Tintore - MAITSA
+#
+# Quick start: docker-compose -f docker-compose.full.yml up -d
+# Acceso: http://localhost (login: admin/demo123)
+
+version: '3.8'
+
+services:
+  # ========== GATEWAY ==========
+  caddy:
+    image: caddy:2-alpine
+    container_name: dashboard-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== DASHBOARD WEB ==========
+  dashboard-web:
+    build: ./dashboard-web
+    container_name: dashboard-web
+    restart: unless-stopped
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== CONVERSOR HEIF ==========
+  conversor:
+    build: ./apps/conversor-heif
+    container_name: conversor
+    restart: unless-stopped
+    volumes:
+      - conversor_uploads:/app/uploads
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== INTRASTAT MANAGER ==========
+  intrastat:
+    build: ./apps/intrastat-manager
+    container_name: intrastat
+    restart: unless-stopped
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== TAXI MANAGEMENT ==========
+  taxi:
+    build: ./apps/taxi-management
+    container_name: taxi
+    restart: unless-stopped
+    volumes:
+      - taxi_data:/app/data
+      - taxi_uploads:/app/uploads
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== ADELA FINANZAS ==========
+  adela:
+    build: ./apps/adela-finanzas
+    container_name: adela
+    restart: unless-stopped
+    volumes:
+      - adela_data:/app/data
+      - adela_uploads:/app/uploads
+      - adela_exports:/app/exports
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== TOROIDAL PROPELLERS ==========
+  toroidal:
+    build: ./apps/toroidal-project
+    container_name: toroidal
+    restart: unless-stopped
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== AEAT STACK ==========
+  
+  # Redis - Message broker
+  redis:
+    image: redis:7-alpine
+    container_name: aeat-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - aeat
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL - Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: aeat-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aeat_v2
+      POSTGRES_USER: aeat_user
+      POSTGRES_PASSWORD: aeat_pass_2024_v2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aeat
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aeat_user -d aeat_v2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # AEAT API - FastAPI
+  aeat-api:
+    build: ./apps/aeat-notificaciones
+    container_name: aeat-api
+    restart: unless-stopped
+    command: uvicorn backend.api.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - aeat_data:/app/data
+      - aeat_logs:/app/logs
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://aeat_user:aeat_pass_2024_v2@postgres:5432/aeat_v2
+    networks:
+      - backend
+      - aeat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # AEAT Dashboard - Streamlit
+  aeat-dashboard:
+    build: ./apps/aeat-notificaciones
+    container_name: aeat-dashboard
+    restart: unless-stopped
+    command: streamlit run frontend/app.py --server.port=8501 --server.address=0.0.0.0
+    depends_on:
+      - aeat-api
+    environment:
+      - API_URL=http://aeat-api:8000
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://aeat_user:aeat_pass_2024_v2@postgres:5432/aeat_v2
+    networks:
+      - backend
+      - aeat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # AEAT Worker - Celery
+  aeat-worker:
+    build: ./apps/aeat-notificaciones
+    container_name: aeat-worker
+    restart: unless-stopped
+    command: celery -A backend.queue.celery_app worker -l info -Q default,high_priority,low_priority --concurrency=2
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - aeat_data:/app/data
+      - aeat_logs:/app/logs
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://aeat_user:aeat_pass_2024_v2@postgres:5432/aeat_v2
+    networks:
+      - aeat
+
+  # AEAT Flower - Celery Monitor
+  aeat-flower:
+    build: ./apps/aeat-notificaciones
+    container_name: aeat-flower
+    restart: unless-stopped
+    command: celery -A backend.queue.celery_app flower --port=5555
+    depends_on:
+      - redis
+      - aeat-worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    networks:
+      - backend
+      - aeat
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5555/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# ========== NETWORKS ==========
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+  aeat:
+    driver: bridge
+
+# ========== VOLUMES ==========
+volumes:
+  caddy_data:
+  caddy_config:
+  conversor_uploads:
+  taxi_data:
+  taxi_uploads:
+  adela_data:
+  adela_uploads:
+  adela_exports:
+  redis_data:
+  postgres_data:
+  aeat_data:
+  aeat_logs:
+
