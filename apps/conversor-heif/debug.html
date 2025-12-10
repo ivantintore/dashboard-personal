@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBUG - Conversor Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { border: 1px solid #ccc; padding: 15px; margin: 10px 0; }
+        button { padding: 10px 15px; margin: 5px; }
+        #logs { background: #f0f0f0; padding: 10px; height: 200px; overflow-y: scroll; font-family: monospace; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔍 DEBUG - Conversor HEIC + PDF a JPG</h1>
+    <p style="color: #666; font-size: 0.9em; margin-top: -10px;">
+        <strong>Version:</strong> v2.5.0 - Updated pillow-heif v1.1.0 + Complex HEIC Support (Jan 2025)
+    </p>
+    
+    <div class="debug-section">
+        <h3>1. Test File Selection</h3>
+        <input type="file" id="fileInput" multiple accept=".heic,.heif,.pdf,.png,.jpg,.jpeg">
+        <button onclick="testFileSelection()">Test File Selection</button>
+        <div id="fileInfo"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>2. Test API Conversion</h3>
+        <button onclick="testAPIConversion()">Test API with Sample File</button>
+        <div id="apiResult"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>3. Test Download Button Creation</h3>
+        <button onclick="testDownloadButton()">Test Download Button</button>
+        <div id="downloadButtonContainer"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>4. Console Logs</h3>
+        <div id="logs"></div>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <script>
+        // Override console.log to show in page
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = '<span class="info">[LOG]</span> ' + args.join(' ');
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        };
+        
+        const originalError = console.error;
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = '<span class="error">[ERROR]</span> ' + args.join(' ');
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        };
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        function testFileSelection() {
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            console.log('🔍 Testing file selection...');
+            
+            if (fileInput.files.length === 0) {
+                fileInfo.innerHTML = '<span class="error">No files selected</span>';
+                console.error('No files selected');
+                return;
+            }
+            
+            const files = Array.from(fileInput.files);
+            console.log('📁 Files selected:', files.length);
+            
+            let html = '<h4>Selected Files:</h4><ul>';
+            files.forEach((file, index) => {
+                html += `<li>${file.name} (${file.size} bytes, ${file.type})</li>`;
+                console.log(`File ${index}: ${file.name} - ${file.size} bytes - ${file.type}`);
+            });
+            html += '</ul>';
+            
+            fileInfo.innerHTML = html;
+        }
+        
+        async function testAPIConversion() {
+            console.log('🚀 Testing API conversion...');
+            const apiResult = document.getElementById('apiResult');
+            
+            try {
+                const fileInput = document.getElementById('fileInput');
+                const formData = new FormData();
+                
+                // Use real selected files if available
+                if (fileInput.files.length > 0) {
+                    console.log(`🎯 Using ${fileInput.files.length} selected files`);
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        formData.append('files', fileInput.files[i]);
+                        console.log(`📎 Added file ${i}: ${fileInput.files[i].name} (${fileInput.files[i].size} bytes)`);
+                    }
+                } else {
+                    console.log('🎯 No files selected, creating test PNG...');
+                    // Create a test file (we'll create a real PNG using Canvas)
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 100;
+                    canvas.height = 100;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Draw a simple test image
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillRect(0, 0, 100, 100);
+                    ctx.fillStyle = '#00ff00';
+                    ctx.fillRect(25, 25, 50, 50);
+                    ctx.fillStyle = '#0000ff';
+                    ctx.fillRect(40, 40, 20, 20);
+                    
+                    // Convert canvas to blob
+                    const testFile = await new Promise(resolve => {
+                        canvas.toBlob(blob => {
+                            resolve(new File([blob], 'test.png', { type: 'image/png' }));
+                        }, 'image/png');
+                    });
+                    
+                    formData.append('files', testFile);
+                }
+                
+                formData.append('quality', '85');
+                formData.append('compression', '85');
+                
+                console.log('📤 Sending request to /api/convert...');
+                
+                const response = await fetch('/api/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('📥 Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('📊 API Response (full object):', result);
+                console.log('📊 API Response keys:', Object.keys(result));
+                console.log('📊 API Response.success:', result.success);
+                console.log('📊 API Response.task_id:', result.task_id);
+                console.log('📊 API Response.download_url:', result.download_url);
+                console.log('📊 API Response.results:', result.results);
+                console.log('📊 API Response.processed_files:', result.processed_files);
+                
+                // Display result
+                apiResult.innerHTML = `
+                    <h4>API Response:</h4>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                    <button onclick="testDownloadWithResult('${JSON.stringify(result).replace(/'/g, "\\'")}')">Test Download with This Result</button>
+                `;
+                
+                // Check for different result structures
+                if (result.success) {
+                    // Check if it's the BatchProcessor structure (with task_id and download_url)
+                    if (result.task_id && result.download_url) {
+                        console.log('✅ API conversion successful (BatchProcessor structure)');
+                        console.log('📦 Task ID:', result.task_id);
+                        console.log('📦 Download URL:', result.download_url);
+                        console.log('📦 Processed files:', result.processed_files);
+                        
+                        // Automatically create download button for successful results
+                        addDownloadButton(result);
+                    }
+                    // Check if it's the main.py structure (with results array)
+                    else if (result.results) {
+                        console.log('✅ API conversion successful (main.py structure)');
+                        console.log('📦 Results array length:', Array.isArray(result.results) ? result.results.length : 'Not an array');
+                        console.log('📦 Results content:', result.results);
+                        console.log('⚠️ Note: This structure lacks task_id and download_url');
+                        console.log('🔍 This means the BatchProcessor is returning error structure instead of success structure');
+                    }
+                    else {
+                        console.log('✅ API conversion successful but unknown structure');
+                        console.log('📋 Available keys:', Object.keys(result));
+                    }
+                } else {
+                    console.error('❌ API conversion failed');
+                    console.error('📋 Error details:', result);
+                }
+                
+            } catch (error) {
+                console.error('❌ API conversion error:', error);
+                apiResult.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+        
+        function testDownloadButton() {
+            console.log('🎯 Testing download button creation...');
+            
+            // Don't use mock data - encourage real API test
+            console.log('⚠️ This button creates a mock download that will fail');
+            console.log('💡 Instead, use "Test API with Sample File" first to get a real task_id');
+            
+            // Mock result similar to what API returns (for button testing only)
+            const mockResult = {
+                success: true,
+                task_id: "mock-task-id",
+                download_url: "/api/download/mock-task-id",
+                results: [
+                    { success: true, output_size: 29404 }
+                ]
+            };
+            
+            console.log('📋 Mock result (for button testing only):', mockResult);
+            
+            addDownloadButton(mockResult);
+        }
+        
+        function addDownloadButton(result) {
+            console.log('🎯 addDownloadButton called with:', result);
+            
+            const resultsContent = document.getElementById('downloadButtonContainer');
+            if (!resultsContent) {
+                console.error('❌ downloadButtonContainer not found');
+                return;
+            }
+            
+            // Remove existing download button
+            const existingBtn = resultsContent.querySelector('.download-btn');
+            if (existingBtn) {
+                existingBtn.remove();
+                console.log('🗑️ Removed existing download button');
+            }
+            
+            // Handle new API structure (BatchProcessor direct result)
+            const downloadUrl = result.download_url;
+            const taskId = result.task_id;
+            const actualResults = result.results || [];
+            const processedFiles = result.processed_files || 0;
+            
+            console.log('📦 Download URL:', downloadUrl);
+            console.log('🆔 Task ID:', taskId);
+            console.log('📊 Results count:', actualResults.length);
+            console.log('✅ Processed files:', processedFiles);
+            
+            if (processedFiles > 0 && downloadUrl && taskId) {
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-btn';
+                downloadBtn.innerHTML = `📥 Download ZIP (${processedFiles} files)`;
+                downloadBtn.onclick = () => downloadResults(result);
+                
+                resultsContent.appendChild(downloadBtn);
+                console.log('✅ Download button created and added');
+                
+                // Also show download info
+                const infoDiv = document.createElement('div');
+                infoDiv.innerHTML = `
+                    <p><strong>Task ID:</strong> ${taskId}</p>
+                    <p><strong>Download URL:</strong> ${downloadUrl}</p>
+                    <p><strong>Processed Files:</strong> ${processedFiles}</p>
+                `;
+                resultsContent.appendChild(infoDiv);
+            } else {
+                console.log('⚠️ No download button created - missing data');
+                console.log('  - processedFiles:', processedFiles);
+                console.log('  - downloadUrl:', downloadUrl);
+                console.log('  - taskId:', taskId);
+                resultsContent.innerHTML = '<span class="error">Incomplete conversion result - no files processed or missing download info</span>';
+            }
+        }
+        
+        async function downloadResults(result) {
+            try {
+                console.log('💾 downloadResults called with:', result);
+                
+                // Use new API structure
+                const downloadUrl = result.download_url;
+                const taskId = result.task_id;
+                
+                console.log('📦 Download URL:', downloadUrl);
+                console.log('🆔 Task ID:', taskId);
+                
+                if (downloadUrl && taskId) {
+                    console.log('🚀 Starting download...');
+                    
+                    // Test URL first with fetch to see server logs
+                    console.log('🔍 Testing URL availability...');
+                    try {
+                        const response = await fetch(downloadUrl, { method: 'HEAD' });
+                        console.log('📡 URL test response status:', response.status);
+                        
+                        if (response.ok) {
+                            console.log('✅ URL is accessible, starting download...');
+                            
+                            // Create download link
+                            const link = document.createElement('a');
+                            link.href = downloadUrl;
+                            link.download = `converted_images_${taskId}.zip`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            
+                            console.log('✅ Download initiated');
+                            alert('Download started! Check your Downloads folder.');
+                        } else {
+                            throw new Error(`Server returned status ${response.status}`);
+                        }
+                    } catch (fetchError) {
+                        console.error('❌ URL test failed:', fetchError);
+                        console.log('⚠️ Attempting direct download anyway...');
+                        
+                        // Try direct download anyway
+                        const link = document.createElement('a');
+                        link.href = downloadUrl;
+                        link.download = `converted_images_${taskId}.zip`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        alert('Download attempted. If it fails, check the server logs.');
+                    }
+                } else {
+                    throw new Error('URL de descarga o task_id no disponible');
+                }
+            } catch (error) {
+                console.error('❌ Error downloading files:', error);
+                alert(`Error en la descarga: ${error.message}`);
+            }
+        }
+        
+        function testDownloadWithResult(resultStr) {
+            try {
+                const result = JSON.parse(resultStr);
+                downloadResults(result);
+            } catch (e) {
+                console.error('Error parsing result:', e);
+            }
+        }
+        
+        console.log('🔧 DEBUG page loaded');
+    </script>
+</body>
+</html>
