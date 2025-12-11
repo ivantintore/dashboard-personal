@@ -44,9 +44,15 @@ keonycs.com {
     # ========== RUTAS PROTEGIDAS ==========
     # Todas las rutas siguientes requieren autenticación
     
+    # Dashboard static assets (no auth required for CSS/JS)
+    handle /_astro/* {
+        reverse_proxy dashboard-web:3000
+    }
+
     @protected {
         not path /auth/*
         not path /health
+        not path /_astro/*
     }
 
     handle @protected {
