@@ -1,7 +1,35 @@
 # Caddyfile - Dashboard Personal Ivan Tintore
+# Enterprise Security Configuration
 # Autenticación con Google OAuth2 via Auth Service
 
 keonycs.com, www.keonycs.com {
+    # ========== SECURITY HEADERS (Global) ==========
+    header {
+        # HSTS - Force HTTPS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        
+        # Prevent clickjacking
+        X-Frame-Options "DENY"
+        
+        # XSS Protection
+        X-XSS-Protection "1; mode=block"
+        
+        # Referrer Policy
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # Content Security Policy
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' wss: https:; frame-ancestors 'none'"
+        
+        # Permissions Policy
+        Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+        
+        # Remove server header
+        -Server
+    }
+
     # Health check sin auth (para monitoreo)
     @health path /health
     handle @health {
@@ -100,11 +128,17 @@ keonycs.com, www.keonycs.com {
             reverse_proxy toroidal:5001
         }
 
-        # Flower Monitor - Celery
+        # Flower Monitor - Celery (ADMIN ONLY)
         handle /flower {
             redir /flower/ permanent
         }
         handle /flower/* {
+            # Restrict to admin role only
+            @not_admin {
+                not header X-Auth-Role admin
+            }
+            respond @not_admin "Access Denied - Admin Only" 403
+            
             uri strip_prefix /flower
             reverse_proxy aeat-flower:5555
         }
@@ -123,7 +157,8 @@ keonycs.com, www.keonycs.com {
     # Logs
     log {
         output stdout
-        format console
+        format json
+        level INFO
     }
 }
 

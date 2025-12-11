@@ -322,6 +322,8 @@
 
         <nav class="nav-links">
             <a href="/tools/">← Volver al Dashboard</a>
+            <a href="/auth/2fa/manage">🔐 Mi 2FA</a>
+            <a href="/auth/admin/audit">📋 Audit Logs</a>
             <a href="/auth/logout">Cerrar sesión</a>
         </nav>
 
@@ -376,6 +378,7 @@
                     <tr>
                         <th>Usuario</th>
                         <th>Rol</th>
+                        <th>2FA</th>
                         <th>Último acceso</th>
                         <th>Acciones</th>
                     </tr>
@@ -402,6 +405,13 @@
                             <span class="role-badge role-{{ u.role }}">
                                 {{ u.role|capitalize }}
                             </span>
+                        </td>
+                        <td>
+                            {% if u.totp_enabled %}
+                            <span style="color: var(--success);">🔐 Activo</span>
+                            {% else %}
+                            <span style="color: var(--text-secondary);">—</span>
+                            {% endif %}
                         </td>
                         <td>
                             <span class="last-login">

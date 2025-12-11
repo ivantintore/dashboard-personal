@@ -3,8 +3,25 @@ __pycache__/
 *.pyc
 venv/
 .env
+.env.*
+!.env.example
 *.db
 uploads/
 exports/
 *.log
 .DS_Store
+
+# Security - Never commit these
+client_secret*.json
+*.pem
+*.key
+*.crt
+!*.example.pem
+secrets/
+.secrets/
+
+# Sensitive documentation
+RESUMEN_PROYECTO.md
+CREDENCIALES*.md
+*_CREDENTIALS*
+*_SECRETS*

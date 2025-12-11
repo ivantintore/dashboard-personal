@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar 2FA - Dashboard Personal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-card: #141414;
+            --bg-input: #1a1a1a;
+            --accent: #4285f4;
+            --accent-hover: #3367d6;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --border: #2a2a2a;
+            --error: #ea4335;
+            --success: #34a853;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .qr-container {
+            text-align: center;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            margin: 16px 0;
+            display: inline-block;
+        }
+
+        .qr-container img {
+            display: block;
+        }
+
+        .manual-key {
+            background: var(--bg-input);
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            text-align: center;
+            letter-spacing: 0.1em;
+            margin: 16px 0;
+            word-break: break-all;
+        }
+
+        .error-msg {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--error);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.25rem;
+            text-align: center;
+            letter-spacing: 0.3em;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .apps-list {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .app-badge {
+            background: var(--bg-input);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🔐 Configurar Autenticación de Dos Factores</h1>
+            <p class="subtitle">Añade una capa extra de seguridad a tu cuenta</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Descarga una app de autenticación</h3>
+                    <p>Si aún no tienes una, instala alguna de estas:</p>
+                    <div class="apps-list">
+                        <span class="app-badge">Google Authenticator</span>
+                        <span class="app-badge">Microsoft Authenticator</span>
+                        <span class="app-badge">Authy</span>
+                        <span class="app-badge">1Password</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Escanea el código QR</h3>
+                    <p>Abre tu app de autenticación y escanea este código:</p>
+                    <div style="text-align: center;">
+                        <div class="qr-container">
+                            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" width="200" height="200">
+                        </div>
+                    </div>
+                    <p>O introduce este código manualmente:</p>
+                    <div class="manual-key">{{ manual_key }}</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Verifica la configuración</h3>
+                    <p>Introduce el código de 6 dígitos que muestra tu app:</p>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="error-msg">
+                Código incorrecto. Asegúrate de introducir el código actual de tu app.
+            </div>
+            {% endif %}
+
+            <form action="/auth/2fa/setup" method="POST">
+                <div class="form-group">
+                    <label for="code">Código de verificación</label>
+                    <input 
+                        type="text" 
+                        id="code" 
+                        name="code" 
+                        class="code-input"
+                        placeholder="000000"
+                        maxlength="6"
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn">Activar 2FA</button>
+            </form>
+
+            <a href="/tools/" class="back-link">← Cancelar</a>
+        </div>
+    </div>
+</body>
+</html>
