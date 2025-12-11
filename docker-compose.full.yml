@@ -1,10 +1,8 @@
 # docker-compose.full.yml - Dashboard Personal COMPLETO
 # Ivan Tintore - MAITSA
 #
-# Quick start: docker-compose -f docker-compose.full.yml up -d
-# Acceso: http://localhost (login: admin/demo123)
-
-version: '3.8'
+# Quick start: docker compose -f docker-compose.full.yml up -d
+# Acceso: https://keonycs.com (Google OAuth2)
 
 services:
   # ========== GATEWAY ==========
@@ -22,8 +20,35 @@ services:
     networks:
       - frontend
       - backend
+    depends_on:
+      - auth-service
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ========== AUTH SERVICE ==========
+  auth-service:
+    build: ./apps/auth-service
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SECRET_KEY=${AUTH_SECRET_KEY:-supersecretkey123}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - BASE_URL=https://keonycs.com
+      - COOKIE_DOMAIN=keonycs.com
+      - SESSION_DURATION_HOURS=24
+      - DATABASE_PATH=/app/data/auth.db
+    volumes:
+      - auth_data:/app/data
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -74,15 +99,17 @@ services:
     build: ./apps/taxi-management
     container_name: taxi
     restart: unless-stopped
+    environment:
+      - PORT=3003
     volumes:
       - taxi_data:/app/data
       - taxi_uploads:/app/uploads
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
 
   # ========== ADELA FINANZAS ==========
@@ -90,6 +117,8 @@ services:
     build: ./apps/adela-finanzas
     container_name: adela
     restart: unless-stopped
+    environment:
+      - PORT=3002
     volumes:
       - adela_data:/app/data
       - adela_uploads:/app/uploads
@@ -97,9 +126,9 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
 
   # ========== TOROIDAL PROPELLERS ==========
@@ -110,19 +139,16 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001"]
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 30s
       timeout: 5s
       retries: 3
 
-  # ========== AEAT STACK ==========
-  
-  # Redis - Message broker
+  # ========== AEAT V2 INFRASTRUCTURE ==========
   redis:
     image: redis:7-alpine
     container_name: aeat-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     networks:
@@ -133,9 +159,8 @@ services:
       timeout: 5s
       retries: 5
 
-  # PostgreSQL - Database
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     container_name: aeat-postgres
     restart: unless-stopped
     environment:
@@ -152,12 +177,11 @@ services:
       timeout: 5s
       retries: 5
 
-  # AEAT API - FastAPI
+  # ========== AEAT V2 SERVICES ==========
   aeat-api:
     build: ./apps/aeat-notificaciones
     container_name: aeat-api
     restart: unless-stopped
-    command: uvicorn backend.api.main:app --host 0.0.0.0 --port 8000
     depends_on:
       redis:
         condition: service_healthy
@@ -168,6 +192,8 @@ services:
       - aeat_logs:/app/logs
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - DATABASE_URL=postgresql://aeat_user:aeat_pass_2024_v2@postgres:5432/aeat_v2
     networks:
       - backend
@@ -178,7 +204,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # AEAT Dashboard - Streamlit
   aeat-dashboard:
     build: ./apps/aeat-notificaciones
     container_name: aeat-dashboard
@@ -189,6 +214,9 @@ services:
     environment:
       - API_URL=http://aeat-api:8000
       - REDIS_URL=redis://redis:6379/0
+      - REDIS_HOST=redis
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - DATABASE_URL=postgresql://aeat_user:aeat_pass_2024_v2@postgres:5432/aeat_v2
     networks:
       - backend
@@ -199,7 +227,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # AEAT Worker - Celery
   aeat-worker:
     build: ./apps/aeat-notificaciones
     container_name: aeat-worker
@@ -215,11 +242,12 @@ services:
       - aeat_logs:/app/logs
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - DATABASE_URL=postgresql://aeat_user:aeat_pass_2024_v2@postgres:5432/aeat_v2
     networks:
       - aeat
 
-  # AEAT Flower - Celery Monitor
   aeat-flower:
     build: ./apps/aeat-notificaciones
     container_name: aeat-flower
@@ -227,14 +255,28 @@ services:
     command: celery -A backend.queue.celery_app flower --port=5555
     depends_on:
       - redis
-      - aeat-worker
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
     networks:
       - backend
       - aeat
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5555/healthcheck"]
+      test: ["CMD", "curl", "-f", "http://localhost:5555"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ========== AEAT V1 (Simple) ==========
+  aeat-v1:
+    build: ./apps/aeat-v1
+    container_name: aeat-v1
+    restart: unless-stopped
+    volumes:
+      - aeat_v1_data:/app/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -252,6 +294,7 @@ networks:
 volumes:
   caddy_data:
   caddy_config:
+  auth_data:
   conversor_uploads:
   taxi_data:
   taxi_uploads:
@@ -262,4 +305,4 @@ volumes:
   postgres_data:
   aeat_data:
   aeat_logs:
-
+  aeat_v1_data:

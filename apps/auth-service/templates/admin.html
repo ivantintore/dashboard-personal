@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Dashboard Personal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-card: #141414;
+            --bg-input: #1a1a1a;
+            --accent: #4285f4;
+            --accent-hover: #3367d6;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --border: #2a2a2a;
+            --success: #34a853;
+            --error: #ea4335;
+            --warning: #fbbc04;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-badge img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        .user-badge .name {
+            font-weight: 500;
+        }
+
+        .user-badge .role {
+            font-size: 0.75rem;
+            color: var(--accent);
+            background: rgba(66, 133, 244, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--error);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-user-form {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .add-user-form input[type="email"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .add-user-form input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .add-user-form select {
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover {
+            background: rgba(234, 67, 53, 0.1);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th,
+        .users-table td {
+            text-align: left;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .users-table th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .users-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-info img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-input);
+        }
+
+        .user-info .email {
+            font-weight: 500;
+        }
+
+        .user-info .name {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .role-admin {
+            background: rgba(66, 133, 244, 0.15);
+            color: var(--accent);
+        }
+
+        .role-user {
+            background: rgba(136, 136, 136, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .last-login {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .add-user-form {
+                flex-direction: column;
+            }
+
+            .add-user-form input[type="email"] {
+                min-width: auto;
+            }
+
+            .users-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>👥 Panel de Administración</h1>
+            </div>
+            <div class="user-badge">
+                {% if user.picture %}
+                <img src="{{ user.picture }}" alt="{{ user.name }}">
+                {% endif %}
+                <div>
+                    <div class="name">{{ user.name or user.email }}</div>
+                    <span class="role">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-links">
+            <a href="/tools/">← Volver al Dashboard</a>
+            <a href="/auth/logout">Cerrar sesión</a>
+        </nav>
+
+        {% if success %}
+        <div class="alert alert-success">
+            {% if success == 'user_added' %}
+                ✅ Usuario añadido correctamente
+            {% elif success == 'user_deleted' %}
+                ✅ Usuario eliminado correctamente
+            {% elif success == 'role_updated' %}
+                ✅ Rol actualizado correctamente
+            {% else %}
+                ✅ Operación completada
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            {% if error == 'invalid_email' %}
+                ❌ Email inválido
+            {% elif error == 'user_exists' %}
+                ❌ Este usuario ya existe
+            {% elif error == 'cannot_delete_self' %}
+                ❌ No puedes eliminarte a ti mismo
+            {% elif error == 'cannot_delete' %}
+                ❌ No se puede eliminar (es el único admin)
+            {% else %}
+                ❌ Ha ocurrido un error
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <h2>➕ Añadir Usuario</h2>
+            <form action="/auth/admin/add-user" method="POST" class="add-user-form">
+                <input type="email" name="email" placeholder="email@ejemplo.com" required>
+                <select name="role">
+                    <option value="user">Usuario</option>
+                    <option value="admin">Administrador</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Añadir</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>👥 Usuarios Autorizados ({{ users|length }})</h2>
+            
+            {% if users %}
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Último acceso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                {% if u.picture %}
+                                <img src="{{ u.picture }}" alt="">
+                                {% else %}
+                                <div style="width:32px;height:32px;background:var(--bg-input);border-radius:50%;display:flex;align-items:center;justify-content:center;">👤</div>
+                                {% endif %}
+                                <div>
+                                    <div class="email">{{ u.email }}</div>
+                                    {% if u.name %}
+                                    <div class="name">{{ u.name }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge role-{{ u.role }}">
+                                {{ u.role|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="last-login">
+                                {% if u.last_login %}
+                                    {{ u.last_login }}
+                                {% else %}
+                                    Nunca
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                {% if u.email != user.email %}
+                                <form action="/auth/admin/delete-user/{{ u.id }}" method="POST" onsubmit="return confirm('¿Eliminar este usuario?')">
+                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p>No hay usuarios registrados</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+

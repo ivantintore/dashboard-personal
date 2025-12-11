@@ -1,73 +1,123 @@
 # Caddyfile - Dashboard Personal Ivan Tintore
-# Todas las apps unificadas bajo un mismo dominio con autenticación
+# Autenticación con Google OAuth2 via Auth Service
 
-:80 {
-    # HTTP Basic Auth
-    # Usuario: admin
-    # Password: demo123 (cambiar en producción)
-    basicauth {
-        admin $2a$14$0A0wdqJvTNRbaqt5fPawougejOlBJUtKmY87x5K.p0J/e6otaZ8Fy
-    }
-
+keonycs.com, www.keonycs.com {
     # Health check sin auth (para monitoreo)
     @health path /health
     handle @health {
         respond "OK" 200
     }
 
-    # ========== APPS PRIVADAS ==========
+    # ========== AUTH SERVICE (sin protección) ==========
+    handle /auth/* {
+        reverse_proxy auth-service:8080
+    }
+
+    # ========== RUTAS PROTEGIDAS ==========
+    # Todas las rutas siguientes requieren autenticación
     
-    # Conversor HEIF - FastAPI
-    handle_path /conversor/* {
-        reverse_proxy conversor:8000
+    @protected {
+        not path /auth/*
+        not path /health
     }
-    redir /conversor /conversor/ permanent
 
-    # AEAT API - FastAPI
-    handle_path /aeat/* {
-        reverse_proxy aeat-api:8000
-    }
-    redir /aeat /aeat/ permanent
+    handle @protected {
+        # Verificar sesión con auth-service
+        forward_auth auth-service:8080 {
+            uri /auth/verify
+            copy_headers X-Auth-User X-Auth-Name X-Auth-Role
+        }
 
-    # AEAT Dashboard - Streamlit
-    handle_path /aeat-ui/* {
-        reverse_proxy aeat-dashboard:8501
-    }
-    redir /aeat-ui /aeat-ui/ permanent
+        # Dashboard principal
+        handle /tools {
+            redir /tools/ permanent
+        }
+        handle /tools/* {
+            uri strip_prefix /tools
+            reverse_proxy dashboard-web:3000
+        }
 
-    # Intrastat Manager - Node serve
-    handle_path /intrastat/* {
-        reverse_proxy intrastat:3001
-    }
-    redir /intrastat /intrastat/ permanent
+        # Conversor HEIF - FastAPI
+        handle /conversor {
+            redir /conversor/ permanent
+        }
+        handle /conversor/* {
+            uri strip_prefix /conversor
+            reverse_proxy conversor:8000
+        }
 
-    # Taxi Management - Node + SQLite
-    handle_path /taxi/* {
-        reverse_proxy taxi:3003
-    }
-    redir /taxi /taxi/ permanent
+        # AEAT API - FastAPI
+        handle /aeat {
+            redir /aeat/ permanent
+        }
+        handle /aeat/* {
+            uri strip_prefix /aeat
+            reverse_proxy aeat-api:8000
+        }
 
-    # Adela Finanzas - Node + SQLite
-    handle_path /adela/* {
-        reverse_proxy adela:3002
-    }
-    redir /adela /adela/ permanent
+        # AEAT Dashboard - Streamlit
+        handle /aeat-ui {
+            redir /aeat-ui/ permanent
+        }
+        handle /aeat-ui/* {
+            uri strip_prefix /aeat-ui
+            reverse_proxy aeat-dashboard:8501
+        }
 
-    # Toroidal Propellers - Flask
-    handle_path /toroidal/* {
-        reverse_proxy toroidal:5001
-    }
-    redir /toroidal /toroidal/ permanent
+        # Intrastat Manager - Node serve
+        handle /intrastat {
+            redir /intrastat/ permanent
+        }
+        handle /intrastat/* {
+            uri strip_prefix /intrastat
+            reverse_proxy intrastat:3001
+        }
 
-    # Flower Monitor - Celery
-    handle_path /flower/* {
-        reverse_proxy aeat-flower:5555
-    }
-    redir /flower /flower/ permanent
+        # Taxi Management - Node + SQLite
+        handle /taxi {
+            redir /taxi/ permanent
+        }
+        handle /taxi/* {
+            uri strip_prefix /taxi
+            reverse_proxy taxi:3003
+        }
 
-    # ========== DASHBOARD (default) ==========
-    handle {
-        reverse_proxy dashboard-web:3000
+        # Adela Finanzas - Node + SQLite
+        handle /adela {
+            redir /adela/ permanent
+        }
+        handle /adela/* {
+            uri strip_prefix /adela
+            reverse_proxy adela:3002
+        }
+
+        # Toroidal Propellers - Flask
+        handle /toroidal {
+            redir /toroidal/ permanent
+        }
+        handle /toroidal/* {
+            uri strip_prefix /toroidal
+            reverse_proxy toroidal:5001
+        }
+
+        # Flower Monitor - Celery
+        handle /flower {
+            redir /flower/ permanent
+        }
+        handle /flower/* {
+            uri strip_prefix /flower
+            reverse_proxy aeat-flower:5555
+        }
+
+        # Admin panel (solo para admins, pero verificación en auth-service)
+        handle /admin {
+            redir /auth/admin permanent
+        }
+
+        # Root -> redirect to login or dashboard
+        handle {
+            redir /tools/ permanent
+        }
     }
 
     # Logs
@@ -77,14 +127,7 @@
     }
 }
 
-# ========== PRODUCCIÓN ==========
-# Descomentar cuando esté listo para desplegar
-# dashboard.ivantintore.com {
-#     # SSL automático con Let's Encrypt
-#     
-#     basicauth {
-#         admin {env.DASHBOARD_PASSWORD_HASH}
-#     }
-#     
-#     # Mismas rutas que arriba...
-# }
+# Redirect www to non-www
+www.keonycs.com {
+    redir https://keonycs.com{uri} permanent
+}

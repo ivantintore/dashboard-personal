@@ -12,3 +12,4 @@ docker-compose -f docker-compose.full.yml down
 echo ""
 echo "✅ Todos los servicios detenidos"
 
+
