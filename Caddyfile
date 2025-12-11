@@ -2,7 +2,7 @@
 # Enterprise Security Configuration
 # Autenticación con Google OAuth2 via Auth Service
 
-keonycs.com, www.keonycs.com {
+keonycs.com {
     # ========== SECURITY HEADERS (Global) ==========
     header {
         # HSTS - Force HTTPS

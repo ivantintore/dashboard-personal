@@ -13,6 +13,37 @@ version: '3.8'
 
 services:
   # ============================================
+  # AUTH SERVICE - Google OAuth2 + 2FA
+  # ============================================
+  auth-service:
+    build:
+      context: ./apps/auth-service
+      dockerfile: Dockerfile
+    container_name: poc-auth-service
+    restart: unless-stopped
+    environment:
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SECRET_KEY=${AUTH_SECRET_KEY:?AUTH_SECRET_KEY is required}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - BASE_URL=https://keonycs.com
+      - COOKIE_DOMAIN=keonycs.com
+      - SESSION_DURATION_HOURS=24
+      - DATABASE_PATH=/app/data/auth.db
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL:-}
+      - TOTP_ISSUER=${TOTP_ISSUER:-Dashboard-MAITSA}
+    volumes:
+      - auth_data:/app/data
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ============================================
   # CADDY - Reverse Proxy + Auth + SSL
   # ============================================
   caddy:
@@ -30,6 +61,7 @@ services:
       - frontend
       - backend
     depends_on:
+      - auth-service
       - dashboard-web
       - conversor
     healthcheck:
@@ -94,5 +126,6 @@ volumes:
   caddy_config:
   conversor_uploads:
   conversor_temp:
+  auth_data:
 
 
