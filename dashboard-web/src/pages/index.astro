@@ -105,6 +105,14 @@ const publicApps = [
     external: true
   }
 ];
+
+const quickLinks = [
+  { icon: '✈️', name: 'SexyFly Reservas', url: 'https://sexyfly-reservas.vercel.app' },
+  { icon: '🐙', name: 'GitHub Profile', url: 'https://github.com/ivantintore' },
+  { icon: '🌸', name: 'Flower Monitor', url: '/flower/' },
+  { icon: '👥', name: 'Gestionar Usuarios', url: '/auth/admin' },
+  { icon: '📧', name: 'ivan@maitsa.com', url: 'mailto:ivan@maitsa.com' },
+];
 ---
 
 <Layout title="Dashboard Personal - Ivan Tintore">
@@ -153,8 +161,21 @@ const publicApps = [
       </div>
     </section>
 
+    <!-- Quick Links -->
+    <section class="quick-section">
+      <h2>⚡ Accesos Rápidos</h2>
+      <div class="quick-links">
+        {quickLinks.map(link => (
+          <a href={link.url} target={link.url.startsWith('http') ? '_blank' : '_self'} rel="noopener" class="quick-link">
+            <span class="quick-icon">{link.icon}</span>
+            <span class="quick-name">{link.name}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
     <footer>
-      <p>© 2024 Ivan Tintore • Dashboard v2.0</p>
+      <p>© 2024 Ivan Tintore • Dashboard v2.0 • MAITSA</p>
     </footer>
   </main>
 </Layout>
@@ -239,11 +260,11 @@ const publicApps = [
     background: #ef4444;
   }
 
-  .apps-section {
+  .apps-section, .quick-section {
     margin-bottom: 3rem;
   }
 
-  .apps-section h2 {
+  .apps-section h2, .quick-section h2 {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
     color: var(--text-secondary);
@@ -349,11 +370,49 @@ const publicApps = [
     opacity: 1;
   }
 
+  /* Quick Links */
+  .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .quick-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .quick-link:hover {
+    background: #252540;
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .quick-icon {
+    font-size: 1.2rem;
+  }
+
+  .quick-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
   footer {
     text-align: center;
     padding: 2rem 0;
     color: var(--text-secondary);
     font-size: 0.9rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin-top: 2rem;
   }
 
   @media (max-width: 768px) {
@@ -372,6 +431,15 @@ const publicApps = [
     .header-actions {
       flex-direction: column;
       align-items: center;
+    }
+
+    .quick-links {
+      flex-direction: column;
+    }
+
+    .quick-link {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>
