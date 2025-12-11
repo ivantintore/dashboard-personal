@@ -1,35 +1,30 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const privateApps = [
+// Configuración de todas las aplicaciones
+const apps = [
   {
-    name: 'AEAT V1 (Simple)',
-    description: 'Dashboard básico de notificaciones tributarias',
+    id: 'conversor',
+    name: 'Conversor HEIF',
+    description: 'Convierte imágenes HEIF/HEIC y PDF a JPG',
+    icon: '🖼️',
+    url: '/conversor/',
+    tech: 'FastAPI + Python',
+    color: '#0070f3',
+    active: true
+  },
+  {
+    id: 'aeat',
+    name: 'AEAT Notificaciones',
+    description: 'Automatización de notificaciones tributarias',
     icon: '📊',
-    url: '/aeat-v1/',
-    tech: 'Streamlit',
+    url: '/aeat-ui/',
+    tech: 'FastAPI + Streamlit + Celery',
     color: '#e74c3c',
     active: true
   },
   {
-    name: 'AEAT V2 (Avanzado)',
-    description: 'Sistema completo con colas asíncronas',
-    icon: '⚡',
-    url: '/aeat-v2-ui/',
-    tech: 'FastAPI + Streamlit + Celery',
-    color: '#c0392b',
-    active: true
-  },
-  {
-    name: 'Conversor HEIF/PDF',
-    description: 'Convierte imágenes HEIC y PDF a JPG',
-    icon: '🖼️',
-    url: '/conversor/',
-    tech: 'FastAPI + Python',
-    color: '#9b59b6',
-    active: true
-  },
-  {
+    id: 'intrastat',
     name: 'Intrastat Manager',
     description: 'Procesa archivos Intrastat para AEAT',
     icon: '📦',
@@ -39,8 +34,9 @@ const privateApps = [
     active: true
   },
   {
+    id: 'taxi',
     name: 'Taxi Management',
-    description: 'Gestión de flota de taxis Barcelona',
+    description: 'Gestión de jornadas y liquidaciones',
     icon: '🚕',
     url: '/taxi/',
     tech: 'Node.js + SQLite',
@@ -48,392 +44,385 @@ const privateApps = [
     active: true
   },
   {
+    id: 'adela',
     name: 'Adela Finanzas',
-    description: 'Control financiero personal',
+    description: 'Procesamiento de extractos bancarios',
     icon: '💰',
     url: '/adela/',
     tech: 'Node.js + SQLite',
-    color: '#3498db',
+    color: '#9b59b6',
     active: true
   },
   {
+    id: 'toroidal',
     name: 'Toroidal Propellers',
-    description: 'Simulador de hélices toroidales',
-    icon: '🌀',
+    description: 'Generador de hélices toroidales',
+    icon: '🔧',
     url: '/toroidal/',
     tech: 'Flask + Python',
-    color: '#1abc9c',
-    active: true
-  },
-  {
-    name: 'Flower Monitor',
-    description: 'Monitoreo de tareas Celery',
-    icon: '🌸',
-    url: '/flower/',
-    tech: 'Celery Flower',
-    color: '#e91e63',
+    color: '#3498db',
     active: true
   }
 ];
 
+// Apps públicas (GitHub)
 const publicApps = [
   {
+    id: 'juegos',
     name: 'Juegos Clásicos',
-    description: 'Colección de juegos retro en JavaScript',
+    description: 'Tetris y más juegos retro',
     icon: '🎮',
     url: 'https://github.com/ivantintore/juegos-clasicos',
-    tech: 'HTML + JavaScript',
-    color: '#2ecc71',
+    tech: 'Python + Pygame',
+    color: '#e91e63',
+    active: true,
     external: true
   },
   {
-    name: 'Pascal a IA Moderna',
-    description: 'Curso completo de programación',
+    id: 'curso',
+    name: 'Curso Pascal → IA',
+    description: 'De Pascal a IA Moderna',
     icon: '📚',
     url: 'https://github.com/ivantintore/De-Pascal-a-IA-Moderna-Curso-Completo',
-    tech: 'Documentación',
-    color: '#3498db',
-    external: true
-  },
-  {
-    name: 'SexyFly Reservas',
-    description: 'Sistema de reservas para SexyFly',
-    icon: '✈️',
-    url: 'https://sexyfly-reservas.vercel.app',
-    tech: 'Vercel',
-    color: '#8e44ad',
+    tech: 'HTML Interactivo',
+    color: '#00bcd4',
+    active: true,
     external: true
   }
-];
-
-const quickLinks = [
-  { icon: '✈️', name: 'SexyFly Reservas', url: 'https://sexyfly-reservas.vercel.app' },
-  { icon: '🐙', name: 'GitHub Profile', url: 'https://github.com/ivantintore' },
-  { icon: '🌸', name: 'Flower Monitor', url: '/flower/' },
-  { icon: '👥', name: 'Gestionar Usuarios', url: '/auth/admin' },
-  { icon: '📧', name: 'ivan@maitsa.com', url: 'mailto:ivan@maitsa.com' },
 ];
 ---
 
 <Layout title="Dashboard Personal - Ivan Tintore">
-  <main>
-    <header>
-      <div class="header-content">
-        <h1>🏠 Dashboard Personal</h1>
-        <p class="subtitle">Ivan Tintore • MAITSA</p>
-        <div class="header-actions">
-          <a href="/auth/admin" class="btn-admin">👥 Usuarios</a>
-          <a href="/auth/logout" class="btn-logout">🚪 Salir</a>
-        </div>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">🏠</span>
+        <h1>Dashboard Personal</h1>
+      </div>
+      <div class="user-info">
+        <span class="user-name">Ivan Tintore</span>
+        <span class="user-badge">CEO MAITSA</span>
       </div>
     </header>
 
-    <section class="apps-section">
-      <h2>🔒 Aplicaciones Privadas</h2>
-      <div class="apps-grid">
-        {privateApps.map(app => (
-          <a href={app.url} class="app-card" style={`--app-color: ${app.color}`}>
-            <div class="app-icon">{app.icon}</div>
-            <div class="app-info">
-              <h3>{app.name}</h3>
-              <p>{app.description}</p>
-              <span class="tech-badge">{app.tech}</span>
-            </div>
-            <div class="status-indicator" class:list={[app.active ? 'active' : 'inactive']}></div>
-          </a>
-        ))}
-      </div>
-    </section>
+    <!-- Main Content -->
+    <main class="main">
+      <section class="welcome">
+        <h2>Bienvenido, Ivan</h2>
+        <p>Tus herramientas de trabajo, siempre disponibles desde cualquier lugar.</p>
+      </section>
 
-    <section class="apps-section">
-      <h2>🌐 Proyectos Públicos</h2>
-      <div class="apps-grid">
-        {publicApps.map(app => (
-          <a href={app.url} target="_blank" rel="noopener" class="app-card external" style={`--app-color: ${app.color}`}>
-            <div class="app-icon">{app.icon}</div>
-            <div class="app-info">
-              <h3>{app.name} <span class="external-icon">↗</span></h3>
-              <p>{app.description}</p>
-              <span class="tech-badge">{app.tech}</span>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
+      <!-- Private Apps Grid -->
+      <section class="apps-section">
+        <h3 class="section-title">🔒 Aplicaciones Privadas</h3>
+        <div class="apps-grid">
+          {apps.map((app) => (
+            <a href={app.url} class={`app-card ${!app.active ? 'placeholder' : ''}`} style={`--card-accent: ${app.color}`}>
+              <div class="app-icon">{app.icon}</div>
+              <div class="app-content">
+                <h4 class="app-name">{app.name}</h4>
+                <p class="app-description">{app.description}</p>
+              </div>
+              <div class="app-footer">
+                <span class="app-tech">{app.tech}</span>
+                <span class="app-status" title={app.active ? "Running" : "Coming soon"}>
+                  {app.active ? '🟢' : '⏳'}
+                </span>
+              </div>
+              <div class="app-arrow">→</div>
+            </a>
+          ))}
+        </div>
+      </section>
 
-    <!-- Quick Links -->
-    <section class="quick-section">
-      <h2>⚡ Accesos Rápidos</h2>
-      <div class="quick-links">
-        {quickLinks.map(link => (
-          <a href={link.url} target={link.url.startsWith('http') ? '_blank' : '_self'} rel="noopener" class="quick-link">
-            <span class="quick-icon">{link.icon}</span>
-            <span class="quick-name">{link.name}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+      <!-- Public Projects -->
+      <section class="apps-section">
+        <h3 class="section-title">🌍 Proyectos Públicos (GitHub)</h3>
+        <div class="apps-grid">
+          {publicApps.map((app) => (
+            <a href={app.url} target="_blank" rel="noopener" class="app-card external" style={`--card-accent: ${app.color}`}>
+              <div class="app-icon">{app.icon}</div>
+              <div class="app-content">
+                <h4 class="app-name">{app.name}</h4>
+                <p class="app-description">{app.description}</p>
+              </div>
+              <div class="app-footer">
+                <span class="app-tech">{app.tech}</span>
+                <span class="app-status" title="GitHub">🔗</span>
+              </div>
+              <div class="app-arrow">↗</div>
+            </a>
+          ))}
+        </div>
+      </section>
 
-    <footer>
-      <p>© 2024 Ivan Tintore • Dashboard v2.0 • MAITSA</p>
+      <!-- Quick Links -->
+      <section class="quick-links">
+        <h3 class="section-title">⚡ Accesos Rápidos</h3>
+        <div class="links-grid">
+          <a href="https://sexyfly-reservas.vercel.app" target="_blank" class="quick-link">
+            <span>✈️</span> SexyFly Reservas
+          </a>
+          <a href="https://github.com/ivantintore" target="_blank" class="quick-link">
+            <span>🐙</span> GitHub Profile
+          </a>
+          <a href="/flower/" class="quick-link">
+            <span>🌸</span> Flower Monitor
+          </a>
+          <a href="/auth/admin" class="quick-link admin-link">
+            <span>👥</span> Gestionar Usuarios
+          </a>
+          <a href="/auth/logout" class="quick-link logout-link">
+            <span>🚪</span> Cerrar Sesión
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Dashboard Personal v3.0 • MAITSA • {new Date().getFullYear()}</p>
     </footer>
-  </main>
+  </div>
 </Layout>
 
 <style>
-  :root {
-    --bg-dark: #0f0f1a;
-    --bg-card: #1a1a2e;
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0b0;
-    --accent: #6366f1;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg-dark);
-    color: var(--text-primary);
-    min-height: 100vh;
-  }
-
-  main {
-    max-width: 1400px;
+  .container {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
-  header {
-    margin-bottom: 3rem;
-    text-align: center;
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
   }
 
-  .header-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #6366f1, #a855f7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
-  .subtitle {
+  .logo-icon {
+    font-size: 2rem;
+  }
+
+  .logo h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-name {
+    font-weight: 500;
+  }
+
+  .user-badge {
+    background: var(--accent);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Main */
+  .main {
+    flex: 1;
+  }
+
+  .welcome {
+    margin-bottom: 40px;
+  }
+
+  .welcome h2 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .welcome p {
     color: var(--text-secondary);
     font-size: 1.1rem;
   }
 
-  .header-actions {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1.5rem;
+  /* Apps Section */
+  .apps-section {
+    margin-bottom: 50px;
   }
 
-  .btn-admin, .btn-logout {
-    padding: 0.6rem 1.2rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-  }
-
-  .btn-admin {
-    background: #374151;
-    color: white;
-  }
-
-  .btn-admin:hover {
-    background: #4b5563;
-  }
-
-  .btn-logout {
-    background: #dc2626;
-    color: white;
-  }
-
-  .btn-logout:hover {
-    background: #ef4444;
-  }
-
-  .apps-section, .quick-section {
-    margin-bottom: 3rem;
-  }
-
-  .apps-section h2, .quick-section h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+  .section-title {
+    font-size: 1rem;
     color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
   }
 
   .apps-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
   }
 
+  /* App Card */
   .app-card {
     background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 1.5rem;
-    text-decoration: none;
-    color: inherit;
+    padding: 24px;
     display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    text-decoration: none;
+    color: inherit;
   }
 
-  .app-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--app-color);
-  }
-
-  .app-card:hover {
+  .app-card:not(.placeholder):hover {
     transform: translateY(-4px);
-    border-color: var(--app-color);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border-color: var(--card-accent, var(--accent));
+    box-shadow: 0 10px 40px rgba(0, 112, 243, 0.15);
+  }
+
+  .app-card.placeholder {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .app-card.external {
+    border-style: dashed;
   }
 
   .app-icon {
     font-size: 2.5rem;
-    flex-shrink: 0;
   }
 
-  .app-info {
+  .app-content {
     flex: 1;
   }
 
-  .app-info h3 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
+  .app-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 4px;
   }
 
-  .app-info p {
-    font-size: 0.9rem;
+  .app-description {
     color: var(--text-secondary);
-    margin-bottom: 0.75rem;
-    line-height: 1.4;
+    font-size: 0.9rem;
   }
 
-  .tech-badge {
-    display: inline-block;
-    background: rgba(99, 102, 241, 0.2);
-    color: #818cf8;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 500;
+  .app-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
   }
 
-  .status-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-  }
-
-  .status-indicator.active {
-    background: #22c55e;
-    box-shadow: 0 0 10px #22c55e;
-  }
-
-  .status-indicator.inactive {
-    background: #ef4444;
-  }
-
-  .external-icon {
+  .app-tech {
+    color: var(--text-secondary);
     font-size: 0.8rem;
-    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 10px;
+    border-radius: 6px;
   }
 
-  .app-card.external {
-    opacity: 0.85;
+  .app-status {
+    font-size: 0.9rem;
   }
 
-  .app-card.external:hover {
+  .app-arrow {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: all 0.2s ease;
+  }
+
+  .app-card:not(.placeholder):hover .app-arrow {
     opacity: 1;
+    right: 20px;
+    color: var(--card-accent, var(--accent));
   }
 
   /* Quick Links */
   .quick-links {
+    margin-bottom: 40px;
+  }
+
+  .links-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
+    gap: 12px;
   }
 
   .quick-link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
+    gap: 8px;
+    padding: 10px 20px;
     background: var(--bg-card);
-    border-radius: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: inherit;
     text-decoration: none;
-    color: var(--text-primary);
     transition: all 0.2s ease;
-    border: 1px solid transparent;
+    font-size: 0.9rem;
   }
 
   .quick-link:hover {
-    background: #252540;
     border-color: var(--accent);
     transform: translateY(-2px);
   }
 
-  .quick-icon {
-    font-size: 1.2rem;
-  }
-
-  .quick-name {
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  footer {
+  /* Footer */
+  .footer {
     text-align: center;
-    padding: 2rem 0;
+    padding: 30px 0;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    margin-top: 2rem;
+    font-size: 0.85rem;
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
   }
 
+  /* Responsive */
   @media (max-width: 768px) {
-    main {
-      padding: 1rem;
-    }
-
-    .header-content h1 {
-      font-size: 1.8rem;
+    .header {
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
     }
 
     .apps-grid {
       grid-template-columns: 1fr;
     }
 
-    .header-actions {
-      flex-direction: column;
-      align-items: center;
+    .welcome h2 {
+      font-size: 1.5rem;
     }
 
-    .quick-links {
+    .links-grid {
       flex-direction: column;
     }
 

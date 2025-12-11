@@ -305,7 +305,7 @@ async def logout(request: Request):
 
 
 @app.get("/auth/verify")
-async def verify_session(request: Request):
+async def verify_session(request: Request, next: str = "/tools/"):
     """Verify session for Caddy forward_auth"""
     user = get_current_user(request)
     if user:
@@ -317,7 +317,11 @@ async def verify_session(request: Request):
                 "X-Auth-Role": user.get('role', 'user')
             }
         )
-    return Response(status_code=401)
+    
+    # Not authenticated - redirect to login
+    # Caddy forward_auth will follow this redirect
+    redirect_url = f"/auth/login?next={validate_redirect_url(next)}"
+    return RedirectResponse(url=redirect_url, status_code=302)
 
 
 # ==================== 2FA ENDPOINTS ====================

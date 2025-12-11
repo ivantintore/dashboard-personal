@@ -52,7 +52,7 @@ keonycs.com {
     handle @protected {
         # Verificar sesión con auth-service
         forward_auth auth-service:8080 {
-            uri /auth/verify
+            uri /auth/verify?next={uri}
             copy_headers X-Auth-User X-Auth-Name X-Auth-Role
         }
 
