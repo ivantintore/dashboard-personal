@@ -21,6 +21,7 @@ docker-compose up -d
 |-----|------|------------|--------|
 | Dashboard | `/` | Astro | ✅ |
 | Conversor HEIF | `/conversor/` | FastAPI + Python | ✅ |
+| Estrategia Lombardo | `/lombardo/` | FastAPI + Python | ✅ |
 | AEAT Notificaciones | `/aeat/` | FastAPI + Streamlit + Celery | 🔧 |
 | Intrastat Manager | `/intrastat/` | Node.js | 🔧 |
 | Taxi Management | `/taxi/` | Node.js + SQLite | 🔧 |
@@ -49,6 +50,7 @@ poc-dashboard/
 ├── dashboard-web/          # Frontend Astro
 ├── apps/                   # Aplicaciones (symlinks)
 │   ├── conversor-heif/
+│   ├── estrategia-lombardo/
 │   ├── aeat-notificaciones/
 │   ├── intrastat-manager/
 │   ├── taxi-management/

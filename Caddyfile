@@ -146,6 +146,15 @@ keonycs.com {
             reverse_proxy toroidal:5001
         }
 
+        # Estrategia Lombardo - FastAPI (Análisis préstamos lombardos)
+        handle /lombardo {
+            redir /lombardo/ permanent
+        }
+        handle /lombardo/* {
+            uri strip_prefix /lombardo
+            reverse_proxy lombardo:8000
+        }
+
         # Flower Monitor - Celery (ADMIN ONLY)
         handle /flower {
             redir /flower/ permanent

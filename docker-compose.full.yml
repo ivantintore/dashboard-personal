@@ -146,6 +146,22 @@ services:
       timeout: 5s
       retries: 3
 
+  # ========== ESTRATEGIA LOMBARDO ==========
+  lombardo:
+    build: ./apps/estrategia-lombardo
+    container_name: lombardo
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      - TZ=Europe/Madrid
+      - ROOT_PATH=/lombardo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   # ========== AEAT STACK ==========
   
   # Redis - Message broker

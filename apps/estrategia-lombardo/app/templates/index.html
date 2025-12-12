@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estrategia Lombardo | Deuda-Rentabilidad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">◈</span>
+                <span class="logo-text">Estrategia Lombardo</span>
+            </div>
+            <nav class="nav">
+                <a href="#estudio-1" class="nav-link active" data-section="1">Crédito Lombardo</a>
+                <a href="#estudio-2" class="nav-link" data-section="2">Activo Colateral</a>
+                <a href="#estudio-3" class="nav-link" data-section="3">Inversión</a>
+                <a href="#estrategia" class="nav-link" data-section="4">Estrategia Completa</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Hero Section with Global Params -->
+            <section class="hero">
+                <div class="hero-content">
+                    <h1>Análisis de Apalancamiento con Préstamo Lombardo</h1>
+                    <p>Evalúa la estrategia: Comprar acciones → Préstamo sobre acciones → Invertir el préstamo</p>
+                </div>
+                <div class="global-params">
+                    <div class="param-group">
+                        <label>Capital Inicial</label>
+                        <div class="input-wrapper">
+                            <span class="currency">€</span>
+                            <input type="number" id="capital-inicial" value="100000" step="10000">
+                        </div>
+                    </div>
+                    <div class="param-group">
+                        <label>Euribor 12M</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="euribor" value="2.5" step="0.1">
+                            <span class="suffix">%</span>
+                        </div>
+                    </div>
+                    <button class="btn-calculate" onclick="calcularTodo()">
+                        <span>Calcular Todo</span>
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Estudio 1: Crédito Lombardo -->
+            <section id="estudio-1" class="section">
+                <div class="section-header">
+                    <div class="section-number">01</div>
+                    <div class="section-title">
+                        <h2>Crédito Lombardo</h2>
+                        <p>Costes y condiciones del préstamo garantizado con valores</p>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <!-- Parámetros del Lombardo -->
+                    <div class="card params-card">
+                        <h3>Parámetros del Préstamo</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>LTV (Loan-to-Value)</label>
+                                <div class="input-wrapper">
+                                    <input type="range" id="ltv" min="50" max="80" value="70" oninput="updateLtvDisplay()">
+                                    <span id="ltv-display" class="range-value">70%</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Spread sobre Euribor</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="spread-lombardo" value="1.5" step="0.1">
+                                    <span class="suffix">%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado Principal -->
+                    <div class="card result-card highlight">
+                        <div class="result-header">
+                            <span class="result-label">Capital del Préstamo</span>
+                            <span id="lombardo-capital" class="result-value">70.000 €</span>
+                        </div>
+                        <div class="result-details">
+                            <div class="detail">
+                                <span class="detail-label">TIN</span>
+                                <span id="lombardo-tin" class="detail-value">4.00%</span>
+                            </div>
+                            <div class="detail">
+                                <span class="detail-label">Coste Mensual</span>
+                                <span id="lombardo-mensual" class="detail-value">233 €</span>
+                            </div>
+                            <div class="detail">
+                                <span class="detail-label">Coste Anual</span>
+                                <span id="lombardo-anual" class="detail-value">2.800 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gastos Iniciales -->
+                    <div class="card">
+                        <h3>Gastos Iniciales</h3>
+                        <div class="breakdown">
+                            <div class="breakdown-item">
+                                <span>Comisión apertura (0.5%)</span>
+                                <span id="lombardo-comision">350 €</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Estudio</span>
+                                <span id="lombardo-estudio">150 €</span>
+                            </div>
+                            <div class="breakdown-item total">
+                                <span>Total</span>
+                                <span id="lombardo-gastos-total">500 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Margin Call -->
+                    <div class="card warning-card">
+                        <h3>⚠️ Análisis de Margin Call</h3>
+                        <div class="margin-call-info">
+                            <p>Si las acciones caen un <strong id="caida-margin">17.6%</strong>, recibirás un <span class="tag warning">Margin Call</span></p>
+                            <p>Si caen un <strong id="caida-liquidacion">26.3%</strong>, el banco <span class="tag danger">liquidará tus acciones</span></p>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-labels">
+                                <span>Actual: 70%</span>
+                                <span id="margin-call-ltv">Margin: 85%</span>
+                                <span id="liquidacion-ltv">Liquid: 95%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="progress-actual" class="progress-fill" style="width: 70%;"></div>
+                                <div class="progress-marker margin" style="left: 85%;"></div>
+                                <div class="progress-marker liquidation" style="left: 95%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparativa Hipoteca vs Lombardo -->
+                <div class="comparison-section">
+                    <h3>Comparativa: Hipoteca vs Lombardo</h3>
+                    <div class="comparison-table">
+                        <div class="comparison-column">
+                            <div class="column-header hipoteca">
+                                <span class="column-icon">🏠</span>
+                                <span>Hipoteca</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">TIN</span>
+                                <span id="hipoteca-tin" class="item-value">3.50%</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Cuota Mensual</span>
+                                <span id="hipoteca-cuota" class="item-value">350 €</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Gastos Iniciales</span>
+                                <span id="hipoteca-gastos" class="item-value">3.500 €</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Garantía</span>
+                                <span class="item-value">Inmueble</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Amortización</span>
+                                <span class="item-value">Sí (mensual)</span>
+                            </div>
+                        </div>
+                        <div class="comparison-column">
+                            <div class="column-header lombardo">
+                                <span class="column-icon">📈</span>
+                                <span>Lombardo</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">TIN</span>
+                                <span id="lombardo-tin-comp" class="item-value">4.00%</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Cuota Mensual</span>
+                                <span id="lombardo-cuota-comp" class="item-value">233 €</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Gastos Iniciales</span>
+                                <span id="lombardo-gastos-comp" class="item-value">500 €</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Garantía</span>
+                                <span class="item-value">Valores</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="item-label">Amortización</span>
+                                <span class="item-value">No (bullet)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estudio 2: Activo Colateral -->
+            <section id="estudio-2" class="section">
+                <div class="section-header">
+                    <div class="section-number">02</div>
+                    <div class="section-title">
+                        <h2>Activo Colateral</h2>
+                        <p>Análisis de las acciones que usarás como garantía</p>
+                    </div>
+                </div>
+
+                <div class="banco-selector">
+                    <h3>Selecciona el Banco</h3>
+                    <div class="banco-buttons" id="banco-buttons">
+                        <button class="banco-btn active" data-ticker="BBVA.MC">
+                            <span class="banco-name">BBVA</span>
+                            <span class="banco-yield">7.0%</span>
+                        </button>
+                        <button class="banco-btn" data-ticker="CABK.MC">
+                            <span class="banco-name">CaixaBank</span>
+                            <span class="banco-yield">7.5%</span>
+                        </button>
+                        <button class="banco-btn" data-ticker="BKT.MC">
+                            <span class="banco-name">Bankinter</span>
+                            <span class="banco-yield">6.0%</span>
+                        </button>
+                        <button class="banco-btn" data-ticker="SAN.MC">
+                            <span class="banco-name">Santander</span>
+                            <span class="banco-yield">3.8%</span>
+                        </button>
+                        <button class="banco-btn" data-ticker="SAB.MC">
+                            <span class="banco-name">Sabadell</span>
+                            <span class="banco-yield">4.5%</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cards-grid">
+                    <!-- Info del Activo -->
+                    <div class="card activo-card">
+                        <div class="activo-header">
+                            <div class="activo-icon">📊</div>
+                            <div class="activo-info">
+                                <h3 id="activo-nombre">BBVA</h3>
+                                <span id="activo-ticker" class="activo-ticker">BBVA.MC</span>
+                            </div>
+                            <div id="activo-precio" class="activo-precio">9.50 €</div>
+                        </div>
+                        <div class="activo-stats">
+                            <div class="stat">
+                                <span class="stat-label">Nº Acciones</span>
+                                <span id="activo-acciones" class="stat-value">10,526</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Sector</span>
+                                <span id="activo-sector" class="stat-value">Banca</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dividendos -->
+                    <div class="card dividend-card highlight">
+                        <h3>Dividendos Estimados</h3>
+                        <div class="dividend-main">
+                            <div class="dividend-yield">
+                                <span class="yield-label">Yield</span>
+                                <span id="activo-yield" class="yield-value">7.00%</span>
+                            </div>
+                            <div class="dividend-amount">
+                                <span id="dividendos-anuales" class="amount-value">7.000 €</span>
+                                <span class="amount-label">/ año</span>
+                            </div>
+                        </div>
+                        <div class="dividend-breakdown">
+                            <div class="breakdown-item">
+                                <span>Dividendo por acción</span>
+                                <span id="dividendo-accion">0.66 €</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Mensual estimado</span>
+                                <span id="dividendos-mensuales">583 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Riesgo -->
+                    <div class="card risk-card">
+                        <h3>Perfil de Riesgo</h3>
+                        <div class="risk-metrics">
+                            <div class="risk-item">
+                                <span class="risk-label">Volatilidad Anual</span>
+                                <span id="activo-volatilidad" class="risk-value">32%</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-label">Beta</span>
+                                <span id="activo-beta" class="risk-value">1.2</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-label">Max Drawdown 1Y</span>
+                                <span id="activo-drawdown" class="risk-value">-80%</span>
+                            </div>
+                            <div class="risk-item">
+                                <span class="risk-label">LTV Recomendado</span>
+                                <span id="activo-ltv-rec" class="risk-value highlight">65%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Para Lombardo -->
+                    <div class="card lombardo-potential">
+                        <h3>Potencial Lombardo</h3>
+                        <div class="potential-main">
+                            <div class="potential-item">
+                                <span class="potential-label">Préstamo Máximo</span>
+                                <span id="prestamo-maximo" class="potential-value">65.000 €</span>
+                            </div>
+                            <div class="potential-item">
+                                <span class="potential-label">Margen de Seguridad</span>
+                                <span id="margen-seguridad" class="potential-value">35%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ranking de Bancos -->
+                <div class="ranking-section">
+                    <h3>Ranking por Rentabilidad por Dividendo</h3>
+                    <div class="ranking-table" id="ranking-table">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estudio 3: Inversión -->
+            <section id="estudio-3" class="section">
+                <div class="section-header">
+                    <div class="section-number">03</div>
+                    <div class="section-title">
+                        <h2>Inversión del Préstamo</h2>
+                        <p>¿En qué invertir el dinero del préstamo para que rinda más que el coste?</p>
+                    </div>
+                </div>
+
+                <div class="spread-indicator">
+                    <div class="spread-info">
+                        <span class="spread-label">Coste del Préstamo</span>
+                        <span id="coste-referencia" class="spread-value negative">4.00%</span>
+                    </div>
+                    <div class="spread-arrow">→</div>
+                    <div class="spread-info">
+                        <span class="spread-label">Mínimo Necesario</span>
+                        <span class="spread-value">Para ser rentable, necesitas &gt; <span id="minimo-rentable">4.00%</span></span>
+                    </div>
+                </div>
+
+                <div class="opciones-grid" id="opciones-inversion">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Escenarios -->
+                <div class="escenarios-section">
+                    <h3>Análisis de Escenarios (¿Qué pasa si cambia el Euribor?)</h3>
+                    <div class="escenarios-chart">
+                        <canvas id="escenarios-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estrategia Completa -->
+            <section id="estrategia" class="section">
+                <div class="section-header">
+                    <div class="section-number">∑</div>
+                    <div class="section-title">
+                        <h2>Estrategia Completa</h2>
+                        <p>Resultado final combinando los 3 estudios</p>
+                    </div>
+                </div>
+
+                <div class="strategy-flow">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Capital Inicial</h4>
+                            <span id="flow-capital" class="step-value">100.000 €</span>
+                            <span class="step-desc">Compras acciones</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Préstamo Lombardo</h4>
+                            <span id="flow-prestamo" class="step-value">70.000 €</span>
+                            <span class="step-desc">70% LTV</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Inversión</h4>
+                            <span id="flow-inversion" class="step-value">70.000 €</span>
+                            <span class="step-desc">En activo seleccionado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cards-grid resultado-grid">
+                    <!-- Ingresos -->
+                    <div class="card ingresos-card">
+                        <h3>💰 Ingresos Anuales</h3>
+                        <div class="resultado-breakdown">
+                            <div class="resultado-item positive">
+                                <span class="resultado-label">Dividendos de acciones</span>
+                                <span id="resultado-dividendos" class="resultado-value">+7.000 €</span>
+                            </div>
+                            <div class="resultado-item positive">
+                                <span class="resultado-label">Rentabilidad inversión</span>
+                                <span id="resultado-rentabilidad" class="resultado-value">+2.450 €</span>
+                            </div>
+                            <div class="resultado-item total positive">
+                                <span class="resultado-label">Total Ingresos</span>
+                                <span id="resultado-ingresos" class="resultado-value">+9.450 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gastos -->
+                    <div class="card gastos-card">
+                        <h3>📉 Gastos Anuales</h3>
+                        <div class="resultado-breakdown">
+                            <div class="resultado-item negative">
+                                <span class="resultado-label">Coste préstamo lombardo</span>
+                                <span id="resultado-coste" class="resultado-value">-2.800 €</span>
+                            </div>
+                            <div class="resultado-item total negative">
+                                <span class="resultado-label">Total Gastos</span>
+                                <span id="resultado-gastos" class="resultado-value">-2.800 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resultado Final -->
+                    <div class="card final-card highlight">
+                        <h3>📊 Resultado Neto</h3>
+                        <div class="final-result">
+                            <div class="final-main">
+                                <span id="resultado-neto" class="final-value positive">+6.650 €</span>
+                                <span class="final-label">beneficio neto / año</span>
+                            </div>
+                            <div class="final-metrics">
+                                <div class="metric">
+                                    <span class="metric-label">ROI sobre capital</span>
+                                    <span id="resultado-roi" class="metric-value">6.65%</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Sin apalancamiento</span>
+                                    <span id="resultado-sin-apalancamiento" class="metric-value">7.00%</span>
+                                </div>
+                                <div class="metric">
+                                    <span class="metric-label">Mejora</span>
+                                    <span id="resultado-mejora" class="metric-value">-0.35%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proyección a 5 años -->
+                <div class="proyeccion-section">
+                    <h3>Proyección a 5 Años</h3>
+                    <div class="proyeccion-chart">
+                        <canvas id="proyeccion-chart"></canvas>
+                    </div>
+                    <div class="proyeccion-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Beneficio Total (5 años)</span>
+                            <span id="beneficio-5-años" class="summary-value">33.250 €</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">ROI Total</span>
+                            <span id="roi-5-años" class="summary-value">33.25%</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">ROI Anualizado</span>
+                            <span id="roi-anualizado" class="summary-value">6.65%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advertencias -->
+                <div class="warnings-section">
+                    <h3>⚠️ Riesgos a Considerar</h3>
+                    <div class="warnings-grid">
+                        <div class="warning-item">
+                            <span class="warning-icon">📉</span>
+                            <div class="warning-content">
+                                <strong>Margin Call</strong>
+                                <p>Si las acciones caen significativamente, deberás aportar más garantías o vender.</p>
+                            </div>
+                        </div>
+                        <div class="warning-item">
+                            <span class="warning-icon">📈</span>
+                            <div class="warning-content">
+                                <strong>Riesgo de Tipos</strong>
+                                <p>Si sube el Euribor, aumenta el coste del préstamo y puede comerse el beneficio.</p>
+                            </div>
+                        </div>
+                        <div class="warning-item">
+                            <span class="warning-icon">💰</span>
+                            <div class="warning-content">
+                                <strong>Dividendos</strong>
+                                <p>Los dividendos no están garantizados y pueden reducirse o eliminarse.</p>
+                            </div>
+                        </div>
+                        <div class="warning-item">
+                            <span class="warning-icon">🔄</span>
+                            <div class="warning-content">
+                                <strong>Renovación</strong>
+                                <p>El préstamo lombardo debe renovarse periódicamente. El banco puede no renovar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Esta herramienta es solo para fines educativos. Consulta con un asesor financiero antes de tomar decisiones de inversión.</p>
+        </footer>
+    </div>
+
+    <script>
+        // ====================================
+        // GLOBAL STATE
+        // ====================================
+        let state = {
+            capitalInicial: 100000,
+            euribor: 0.025,
+            ltv: 0.70,
+            spreadLombardo: 0.015,
+            tickerActivo: 'BBVA.MC',
+            yieldActivo: 0.07,
+            rentabilidadInversion: 0.035
+        };
+
+        let charts = {
+            escenarios: null,
+            proyeccion: null
+        };
+
+        // ====================================
+        // INITIALIZATION
+        // ====================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initNavigation();
+            initBancoSelector();
+            calcularTodo();
+        });
+
+        function initNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                });
+            });
+        }
+
+        function initBancoSelector() {
+            const buttons = document.querySelectorAll('.banco-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.tickerActivo = btn.dataset.ticker;
+                    calcularActivo();
+                    calcularEstrategia();
+                });
+            });
+        }
+
+        // ====================================
+        // MAIN CALCULATION
+        // ====================================
+        async function calcularTodo() {
+            updateStateFromInputs();
+            await Promise.all([
+                calcularLombardo(),
+                calcularActivo(),
+                calcularInversion(),
+                calcularComparativa()
+            ]);
+            await calcularEstrategia();
+        }
+
+        function updateStateFromInputs() {
+            state.capitalInicial = parseFloat(document.getElementById('capital-inicial').value) || 100000;
+            state.euribor = (parseFloat(document.getElementById('euribor').value) || 2.5) / 100;
+            state.ltv = (parseFloat(document.getElementById('ltv').value) || 70) / 100;
+            state.spreadLombardo = (parseFloat(document.getElementById('spread-lombardo').value) || 1.5) / 100;
+        }
+
+        function updateLtvDisplay() {
+            const ltv = document.getElementById('ltv').value;
+            document.getElementById('ltv-display').textContent = ltv + '%';
+            state.ltv = ltv / 100;
+            calcularLombardo();
+            calcularEstrategia();
+        }
+
+        // ====================================
+        // ESTUDIO 1: LOMBARDO
+        // ====================================
+        async function calcularLombardo() {
+            try {
+                const params = new URLSearchParams({
+                    valor_garantia: state.capitalInicial,
+                    ltv: state.ltv,
+                    euribor: state.euribor,
+                    spread: state.spreadLombardo
+                });
+                
+                const response = await fetch(`api/lombardo/calcular?${params}`);
+                const data = await response.json();
+                
+                // Update UI
+                document.getElementById('lombardo-capital').textContent = formatCurrency(data.prestamo.capital_prestado);
+                document.getElementById('lombardo-tin').textContent = data.costes.tin_anual;
+                document.getElementById('lombardo-mensual').textContent = formatCurrency(data.costes.coste_mensual);
+                document.getElementById('lombardo-anual').textContent = formatCurrency(data.costes.intereses_anuales);
+                document.getElementById('lombardo-comision').textContent = formatCurrency(data.costes.comision_apertura);
+                document.getElementById('lombardo-estudio').textContent = '150 €';
+                document.getElementById('lombardo-gastos-total').textContent = formatCurrency(data.costes.gastos_totales_inicio);
+                
+                // Margin call
+                document.getElementById('caida-margin').textContent = data.riesgo.caida_hasta_margin_call;
+                document.getElementById('caida-liquidacion').textContent = data.riesgo.caida_hasta_liquidacion;
+                
+                // Progress bar
+                const ltvPercent = state.ltv * 100;
+                document.getElementById('progress-actual').style.width = `${ltvPercent}%`;
+                
+                // Comparison
+                document.getElementById('lombardo-tin-comp').textContent = data.costes.tin_anual;
+                document.getElementById('lombardo-cuota-comp').textContent = formatCurrency(data.costes.coste_mensual);
+                document.getElementById('lombardo-gastos-comp').textContent = formatCurrency(data.costes.gastos_totales_inicio);
+                
+            } catch (error) {
+                console.error('Error calculando lombardo:', error);
+            }
+        }
+
+        // ====================================
+        // ESTUDIO 2: ACTIVO
+        // ====================================
+        async function calcularActivo() {
+            try {
+                const response = await fetch(`api/activos/analizar/${state.tickerActivo}?inversion=${state.capitalInicial}`);
+                const data = await response.json();
+                
+                // Update state
+                state.yieldActivo = parseFloat(data.dividendos.yield.replace('%', '')) / 100;
+                
+                // Update UI
+                document.getElementById('activo-nombre').textContent = data.activo.nombre;
+                document.getElementById('activo-ticker').textContent = data.activo.ticker;
+                document.getElementById('activo-precio').textContent = data.activo.precio.toFixed(2) + ' €';
+                document.getElementById('activo-acciones').textContent = formatNumber(data.inversion.num_acciones);
+                document.getElementById('activo-sector').textContent = 'Banca';
+                
+                document.getElementById('activo-yield').textContent = data.dividendos.yield;
+                document.getElementById('dividendos-anuales').textContent = formatCurrency(data.dividendos.total_anual);
+                document.getElementById('dividendo-accion').textContent = data.dividendos.dividendo_por_accion.toFixed(2) + ' €';
+                document.getElementById('dividendos-mensuales').textContent = formatCurrency(data.dividendos.total_mensual);
+                
+                document.getElementById('activo-volatilidad').textContent = data.riesgo.volatilidad;
+                document.getElementById('activo-beta').textContent = data.riesgo.beta;
+                document.getElementById('activo-drawdown').textContent = data.riesgo.max_drawdown_1y;
+                document.getElementById('activo-ltv-rec').textContent = data.riesgo.ltv_recomendado;
+                
+                document.getElementById('prestamo-maximo').textContent = formatCurrency(data.para_lombardo.prestamo_maximo);
+                document.getElementById('margen-seguridad').textContent = data.para_lombardo.margen_seguridad;
+                
+                // Load ranking
+                await cargarRanking();
+                
+            } catch (error) {
+                console.error('Error calculando activo:', error);
+            }
+        }
+
+        async function cargarRanking() {
+            try {
+                const response = await fetch('api/activos/ranking-dividendos');
+                const ranking = await response.json();
+                
+                const container = document.getElementById('ranking-table');
+                container.innerHTML = ranking.map((banco, i) => `
+                    <div class="ranking-row ${banco.ticker === state.tickerActivo ? 'active' : ''}">
+                        <span class="ranking-position">${banco.posicion}</span>
+                        <span class="ranking-name">${banco.nombre}</span>
+                        <span class="ranking-ticker">${banco.ticker}</span>
+                        <span class="ranking-yield">${banco.yield}</span>
+                        <span class="ranking-ltv">${banco.ltv_recomendado}</span>
+                        <span class="ranking-prestamo">${formatCurrency(banco.prestamo_sobre_100k)}</span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error cargando ranking:', error);
+            }
+        }
+
+        // ====================================
+        // ESTUDIO 3: INVERSIÓN
+        // ====================================
+        async function calcularInversion() {
+            try {
+                const costePrestamo = state.euribor + state.spreadLombardo;
+                const capitalPrestamo = state.capitalInicial * state.ltv;
+                
+                const params = new URLSearchParams({
+                    capital_prestamo: capitalPrestamo,
+                    coste_prestamo: costePrestamo,
+                    perfil: 'moderado'
+                });
+                
+                const response = await fetch(`api/inversion/opciones?${params}`);
+                const data = await response.json();
+                
+                // Update minimum
+                document.getElementById('coste-referencia').textContent = (costePrestamo * 100).toFixed(2) + '%';
+                document.getElementById('minimo-rentable').textContent = (costePrestamo * 100).toFixed(2) + '%';
+                
+                // Update options
+                const container = document.getElementById('opciones-inversion');
+                container.innerHTML = data.todas_las_opciones.map(op => `
+                    <div class="opcion-card ${op.conclusion.es_rentable ? 'rentable' : 'no-rentable'}"
+                         onclick="seleccionarInversion('${op.key}', ${parseFloat(op.numeros.rentabilidad_esperada.replace('%', '')) / 100})">
+                        <div class="opcion-header">
+                            <span class="opcion-nombre">${op.opcion.nombre}</span>
+                            <span class="opcion-veredicto">${op.conclusion.veredicto}</span>
+                        </div>
+                        <div class="opcion-body">
+                            <div class="opcion-stat">
+                                <span class="stat-label">Rentabilidad</span>
+                                <span class="stat-value">${op.numeros.rentabilidad_esperada}</span>
+                            </div>
+                            <div class="opcion-stat">
+                                <span class="stat-label">Spread</span>
+                                <span class="stat-value ${parseFloat(op.numeros.spread.replace('%', '')) > 0 ? 'positive' : 'negative'}">${op.numeros.spread}</span>
+                            </div>
+                            <div class="opcion-stat">
+                                <span class="stat-label">Beneficio/año</span>
+                                <span class="stat-value">${formatCurrency(op.numeros.beneficio_neto_anual)}</span>
+                            </div>
+                        </div>
+                        <div class="opcion-footer">
+                            <span class="opcion-riesgo">${op.opcion.riesgo}</span>
+                            <span class="opcion-liquidez">${op.opcion.liquidez}</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Load scenarios chart
+                await cargarEscenarios();
+                
+            } catch (error) {
+                console.error('Error calculando inversión:', error);
+            }
+        }
+
+        function seleccionarInversion(key, rentabilidad) {
+            state.rentabilidadInversion = rentabilidad;
+            
+            // Update selection visual
+            document.querySelectorAll('.opcion-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            calcularEstrategia();
+        }
+
+        async function cargarEscenarios() {
+            try {
+                const capitalPrestamo = state.capitalInicial * state.ltv;
+                const response = await fetch(`api/inversion/escenarios?capital=${capitalPrestamo}`);
+                const escenarios = await response.json();
+                
+                const ctx = document.getElementById('escenarios-chart').getContext('2d');
+                
+                if (charts.escenarios) {
+                    charts.escenarios.destroy();
+                }
+                
+                charts.escenarios = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: escenarios.map(e => e.coste_prestamo),
+                        datasets: [{
+                            label: 'Beneficio Anual',
+                            data: escenarios.map(e => e.beneficio_anual),
+                            backgroundColor: escenarios.map(e => 
+                                e.es_rentable ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+                            ),
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => formatCurrency(ctx.raw)
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Coste del Préstamo (TAE)' }
+                            },
+                            y: {
+                                title: { display: true, text: 'Beneficio Anual (€)' },
+                                ticks: {
+                                    callback: (val) => formatCurrency(val)
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error cargando escenarios:', error);
+            }
+        }
+
+        // ====================================
+        // COMPARATIVA HIPOTECA
+        // ====================================
+        async function calcularComparativa() {
+            try {
+                const capitalPrestamo = state.capitalInicial * state.ltv;
+                
+                const params = new URLSearchParams({
+                    capital: capitalPrestamo,
+                    hipoteca_plazo: 25,
+                    hipoteca_spread: 0.01,
+                    lombardo_ltv: state.ltv,
+                    lombardo_spread: state.spreadLombardo,
+                    euribor: state.euribor
+                });
+                
+                const response = await fetch(`api/comparar/hipoteca-lombardo?${params}`);
+                const data = await response.json();
+                
+                document.getElementById('hipoteca-tin').textContent = data.hipoteca.tin;
+                document.getElementById('hipoteca-cuota').textContent = formatCurrency(data.hipoteca.cuota_mensual);
+                document.getElementById('hipoteca-gastos').textContent = formatCurrency(data.hipoteca.gastos_iniciales);
+                
+            } catch (error) {
+                console.error('Error calculando comparativa:', error);
+            }
+        }
+
+        // ====================================
+        // ESTRATEGIA COMPLETA
+        // ====================================
+        async function calcularEstrategia() {
+            try {
+                const params = new URLSearchParams({
+                    capital_inicial: state.capitalInicial,
+                    yield_activo: state.yieldActivo,
+                    ltv: state.ltv,
+                    coste_prestamo: state.euribor + state.spreadLombardo,
+                    rentabilidad_inversion: state.rentabilidadInversion,
+                    años: 5
+                });
+                
+                const response = await fetch(`api/estrategia/simulador?${params}`);
+                const data = await response.json();
+                
+                // Update flow
+                document.getElementById('flow-capital').textContent = formatCurrency(state.capitalInicial);
+                document.getElementById('flow-prestamo').textContent = formatCurrency(state.capitalInicial * state.ltv);
+                document.getElementById('flow-inversion').textContent = formatCurrency(state.capitalInicial * state.ltv);
+                
+                // Update results
+                const proyeccion = data.proyeccion;
+                const ultimo = proyeccion[0]; // Primer año
+                
+                document.getElementById('resultado-dividendos').textContent = '+' + formatCurrency(ultimo.dividendos);
+                document.getElementById('resultado-rentabilidad').textContent = '+' + formatCurrency(ultimo.rentabilidad_inversion);
+                document.getElementById('resultado-ingresos').textContent = '+' + formatCurrency(ultimo.dividendos + ultimo.rentabilidad_inversion);
+                document.getElementById('resultado-coste').textContent = '-' + formatCurrency(ultimo.coste_prestamo);
+                document.getElementById('resultado-gastos').textContent = '-' + formatCurrency(ultimo.coste_prestamo);
+                
+                const beneficioNeto = ultimo.beneficio_año;
+                const isPositive = beneficioNeto >= 0;
+                const resultadoNetoEl = document.getElementById('resultado-neto');
+                resultadoNetoEl.textContent = (isPositive ? '+' : '') + formatCurrency(beneficioNeto);
+                resultadoNetoEl.className = 'final-value ' + (isPositive ? 'positive' : 'negative');
+                
+                document.getElementById('resultado-roi').textContent = (ultimo.roi_año * 100).toFixed(2) + '%';
+                document.getElementById('resultado-sin-apalancamiento').textContent = (state.yieldActivo * 100).toFixed(2) + '%';
+                
+                const mejora = ultimo.roi_año - state.yieldActivo;
+                document.getElementById('resultado-mejora').textContent = (mejora >= 0 ? '+' : '') + (mejora * 100).toFixed(2) + '%';
+                
+                // 5 year summary
+                const ultimoAño = proyeccion[proyeccion.length - 1];
+                document.getElementById('beneficio-5-años').textContent = formatCurrency(ultimoAño.beneficio_acumulado);
+                document.getElementById('roi-5-años').textContent = (ultimoAño.roi_acumulado * 100).toFixed(2) + '%';
+                document.getElementById('roi-anualizado').textContent = data.resumen.roi_anualizado;
+                
+                // Update chart
+                const ctx = document.getElementById('proyeccion-chart').getContext('2d');
+                
+                if (charts.proyeccion) {
+                    charts.proyeccion.destroy();
+                }
+                
+                charts.proyeccion = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: proyeccion.map(p => `Año ${p.año}`),
+                        datasets: [
+                            {
+                                label: 'Beneficio Acumulado',
+                                data: proyeccion.map(p => p.beneficio_acumulado),
+                                borderColor: 'rgb(34, 197, 94)',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Ingresos (Dividendos + Inversión)',
+                                data: proyeccion.map(p => p.dividendos + p.rentabilidad_inversion),
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderDash: [5, 5],
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Coste Préstamo',
+                                data: proyeccion.map(p => p.coste_prestamo),
+                                borderColor: 'rgb(239, 68, 68)',
+                                borderDash: [5, 5],
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: (val) => formatCurrency(val)
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error calculando estrategia:', error);
+            }
+        }
+
+        // ====================================
+        // UTILITIES
+        // ====================================
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('es-ES', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        function formatNumber(value) {
+            return new Intl.NumberFormat('es-ES', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+    </script>
+</body>
+</html>
+

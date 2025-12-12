@@ -109,6 +109,26 @@ services:
       timeout: 10s
       retries: 3
 
+  # ============================================
+  # ESTRATEGIA LOMBARDO - FastAPI (Análisis préstamos lombardos)
+  # ============================================
+  lombardo:
+    build:
+      context: ./apps/estrategia-lombardo
+      dockerfile: Dockerfile
+    container_name: poc-lombardo
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      - TZ=Europe/Madrid
+      - ROOT_PATH=/lombardo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 # ============================================
 # NETWORKS
 # ============================================
