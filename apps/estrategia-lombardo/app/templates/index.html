@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
     <div class="app">
@@ -634,7 +634,7 @@
                     spread: state.spreadLombardo
                 });
                 
-                const response = await fetch(`/api/lombardo/calcular?${params}`);
+                const response = await fetch(`api/lombardo/calcular?${params}`);
                 const data = await response.json();
                 
                 // Update UI
@@ -669,7 +669,7 @@
         // ====================================
         async function calcularActivo() {
             try {
-                const response = await fetch(`/api/activos/analizar/${state.tickerActivo}?inversion=${state.capitalInicial}`);
+                const response = await fetch(`api/activos/analizar/${state.tickerActivo}?inversion=${state.capitalInicial}`);
                 const data = await response.json();
                 
                 // Update state
@@ -705,7 +705,7 @@
 
         async function cargarRanking() {
             try {
-                const response = await fetch(`/api/activos/ranking-dividendos`);
+                const response = await fetch(`api/activos/ranking-dividendos`);
                 const ranking = await response.json();
                 
                 const container = document.getElementById('ranking-table');
@@ -739,7 +739,7 @@
                     perfil: 'moderado'
                 });
                 
-                const response = await fetch(`/api/inversion/opciones?${params}`);
+                const response = await fetch(`api/inversion/opciones?${params}`);
                 const data = await response.json();
                 
                 // Update minimum
@@ -799,7 +799,7 @@
         async function cargarEscenarios() {
             try {
                 const capitalPrestamo = state.capitalInicial * state.ltv;
-                const response = await fetch(`/api/inversion/escenarios?capital=${capitalPrestamo}`);
+                const response = await fetch(`api/inversion/escenarios?capital=${capitalPrestamo}`);
                 const escenarios = await response.json();
                 
                 const ctx = document.getElementById('escenarios-chart').getContext('2d');
@@ -867,7 +867,7 @@
                     euribor: state.euribor
                 });
                 
-                const response = await fetch(`/api/comparar/hipoteca-lombardo?${params}`);
+                const response = await fetch(`api/comparar/hipoteca-lombardo?${params}`);
                 const data = await response.json();
                 
                 document.getElementById('hipoteca-tin').textContent = data.hipoteca.tin;
@@ -893,7 +893,7 @@
                     años: 5
                 });
                 
-                const response = await fetch(`/api/estrategia/simulador?${params}`);
+                const response = await fetch(`api/estrategia/simulador?${params}`);
                 const data = await response.json();
                 
                 // Update flow
