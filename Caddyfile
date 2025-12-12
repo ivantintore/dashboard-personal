@@ -49,10 +49,22 @@ keonycs.com {
         reverse_proxy dashboard-web:3000
     }
 
+    # Adela static assets (no auth required for CSS/JS)
+    handle /adela/styles/* {
+        uri strip_prefix /adela
+        reverse_proxy adela:3002
+    }
+    handle /adela/scripts/* {
+        uri strip_prefix /adela
+        reverse_proxy adela:3002
+    }
+
     @protected {
         not path /auth/*
         not path /health
         not path /_astro/*
+        not path /adela/styles/*
+        not path /adela/scripts/*
     }
 
     handle @protected {
