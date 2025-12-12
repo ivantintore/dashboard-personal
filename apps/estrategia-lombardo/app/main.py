@@ -24,15 +24,11 @@ from .calculators.activo import comparar_bancos_españoles, ranking_por_rentabil
 from .calculators.inversion import calcular_rentabilidad_total_estrategia, analisis_escenarios
 from .calculators.hipoteca import comparar_hipoteca_vs_lombardo
 
-# Configuración del root_path para reverse proxy
-ROOT_PATH = os.environ.get("ROOT_PATH", "")
-
-# Crear app
+# Crear app (sin root_path - Caddy maneja el subpath con strip_prefix)
 app = FastAPI(
     title="Deuda-Rentabilidad",
     description="Análisis de estrategias de apalancamiento con préstamos lombardos",
-    version="1.0.0",
-    root_path=ROOT_PATH
+    version="1.0.0"
 )
 
 # Configurar templates y static files

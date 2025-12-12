@@ -20,9 +20,6 @@ COPY app/ ./app/
 # Puerto de la aplicación
 EXPOSE 8000
 
-# Variables de entorno para el subpath
-ENV ROOT_PATH="/tools/lombardo"
-
-# Comando para iniciar
+# Comando para iniciar (Caddy maneja el subpath con strip_prefix)
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
 
