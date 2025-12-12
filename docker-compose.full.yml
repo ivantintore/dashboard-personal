@@ -116,10 +116,15 @@ services:
     build: ./apps/adela-finanzas
     container_name: adela
     restart: unless-stopped
+    ports:
+      - "3002:3002"
     volumes:
       - adela_data:/app/data
       - adela_uploads:/app/uploads
       - adela_exports:/app/exports
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
     networks:
       - backend
     healthcheck:
