@@ -210,134 +210,174 @@
                 </div>
             </section>
 
-            <!-- Estudio 2: Activo Colateral -->
+            <!-- Estudio 2: Activo Colateral - IBEX 35 -->
             <section id="estudio-2" class="section">
                 <div class="section-header">
                     <div class="section-number">02</div>
                     <div class="section-title">
                         <h2>Activo Colateral</h2>
-                        <p>Análisis de las acciones que usarás como garantía</p>
+                        <p>Análisis de los valores del IBEX 35 como garantía (datos 5 años)</p>
                     </div>
                 </div>
 
-                <div class="banco-selector">
-                    <h3>Selecciona el Banco</h3>
-                    <div class="banco-buttons" id="banco-buttons">
-                        <button class="banco-btn active" data-ticker="BBVA.MC">
-                            <span class="banco-name">BBVA</span>
-                            <span class="banco-yield">7.0%</span>
+                <!-- Selector de Sector -->
+                <div class="sector-selector">
+                    <h3>Filtrar por Sector</h3>
+                    <div class="sector-buttons" id="sector-buttons">
+                        <button class="sector-btn active" data-sector="todos">
+                            <span>📊 Todos</span>
                         </button>
-                        <button class="banco-btn" data-ticker="CABK.MC">
-                            <span class="banco-name">CaixaBank</span>
-                            <span class="banco-yield">7.5%</span>
+                        <button class="sector-btn" data-sector="Banca">
+                            <span>🏦 Banca</span>
                         </button>
-                        <button class="banco-btn" data-ticker="BKT.MC">
-                            <span class="banco-name">Bankinter</span>
-                            <span class="banco-yield">6.0%</span>
+                        <button class="sector-btn" data-sector="Utilities">
+                            <span>⚡ Utilities</span>
                         </button>
-                        <button class="banco-btn" data-ticker="SAN.MC">
-                            <span class="banco-name">Santander</span>
-                            <span class="banco-yield">3.8%</span>
+                        <button class="sector-btn" data-sector="Energías Renovables">
+                            <span>🌱 Renovables</span>
                         </button>
-                        <button class="banco-btn" data-ticker="SAB.MC">
-                            <span class="banco-name">Sabadell</span>
-                            <span class="banco-yield">4.5%</span>
+                        <button class="sector-btn" data-sector="Infraestructuras">
+                            <span>🏗️ Infraestructuras</span>
+                        </button>
+                        <button class="sector-btn" data-sector="Telecomunicaciones">
+                            <span>📡 Telecom</span>
+                        </button>
+                        <button class="sector-btn" data-sector="Retail">
+                            <span>🛒 Retail</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="cards-grid">
-                    <!-- Info del Activo -->
+                <!-- Top Valores por Yield -->
+                <div class="top-valores-section">
+                    <h3>Top Valores IBEX 35 por Rentabilidad por Dividendo</h3>
+                    <div class="top-valores-grid" id="top-valores-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="cards-grid cards-grid-3">
+                    <!-- Info del Activo Seleccionado -->
                     <div class="card activo-card">
                         <div class="activo-header">
-                            <div class="activo-icon">📊</div>
+                            <div class="activo-icon">📈</div>
                             <div class="activo-info">
-                                <h3 id="activo-nombre">BBVA</h3>
-                                <span id="activo-ticker" class="activo-ticker">BBVA.MC</span>
+                                <h3 id="activo-nombre">Selecciona un valor</h3>
+                                <span id="activo-ticker" class="activo-ticker">-</span>
                             </div>
-                            <div id="activo-precio" class="activo-precio">9.50 €</div>
+                            <div id="activo-precio" class="activo-precio">- €</div>
                         </div>
                         <div class="activo-stats">
                             <div class="stat">
                                 <span class="stat-label">Nº Acciones</span>
-                                <span id="activo-acciones" class="stat-value">10,526</span>
+                                <span id="activo-acciones" class="stat-value">-</span>
                             </div>
                             <div class="stat">
                                 <span class="stat-label">Sector</span>
-                                <span id="activo-sector" class="stat-value">Banca</span>
+                                <span id="activo-sector" class="stat-value">-</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Dividendos -->
+                    <!-- Dividendos con Histórico -->
                     <div class="card dividend-card highlight">
-                        <h3>Dividendos Estimados</h3>
+                        <h3>Análisis de Dividendos (5 años)</h3>
                         <div class="dividend-main">
                             <div class="dividend-yield">
-                                <span class="yield-label">Yield</span>
-                                <span id="activo-yield" class="yield-value">7.00%</span>
+                                <span class="yield-label">Yield Actual</span>
+                                <span id="activo-yield" class="yield-value">-</span>
                             </div>
                             <div class="dividend-amount">
-                                <span id="dividendos-anuales" class="amount-value">7.000 €</span>
+                                <span id="dividendos-anuales" class="amount-value">- €</span>
                                 <span class="amount-label">/ año</span>
                             </div>
                         </div>
                         <div class="dividend-breakdown">
                             <div class="breakdown-item">
+                                <span>Crecimiento 5 años (CAGR)</span>
+                                <span id="dividendo-cagr" class="cagr-value">-</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Consistencia</span>
+                                <span id="dividendo-consistencia" class="consistencia-badge">-</span>
+                            </div>
+                            <div class="breakdown-item">
                                 <span>Dividendo por acción</span>
-                                <span id="dividendo-accion">0.66 €</span>
+                                <span id="dividendo-accion">- €</span>
                             </div>
                             <div class="breakdown-item">
                                 <span>Mensual estimado</span>
-                                <span id="dividendos-mensuales">583 €</span>
+                                <span id="dividendos-mensuales">- €</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Riesgo -->
+                    <!-- Riesgo y LTV -->
                     <div class="card risk-card">
                         <h3>Perfil de Riesgo</h3>
                         <div class="risk-metrics">
                             <div class="risk-item">
                                 <span class="risk-label">Volatilidad Anual</span>
-                                <span id="activo-volatilidad" class="risk-value">32%</span>
+                                <span id="activo-volatilidad" class="risk-value">-</span>
                             </div>
                             <div class="risk-item">
                                 <span class="risk-label">Beta</span>
-                                <span id="activo-beta" class="risk-value">1.2</span>
+                                <span id="activo-beta" class="risk-value">-</span>
                             </div>
                             <div class="risk-item">
-                                <span class="risk-label">Max Drawdown 1Y</span>
-                                <span id="activo-drawdown" class="risk-value">-80%</span>
+                                <span class="risk-label">Max Drawdown 5Y</span>
+                                <span id="activo-drawdown" class="risk-value">-</span>
                             </div>
                             <div class="risk-item">
                                 <span class="risk-label">LTV Recomendado</span>
-                                <span id="activo-ltv-rec" class="risk-value highlight">65%</span>
+                                <span id="activo-ltv-rec" class="risk-value highlight">-</span>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Para Lombardo -->
-                    <div class="card lombardo-potential">
-                        <h3>Potencial Lombardo</h3>
-                        <div class="potential-main">
+                        <div class="potential-main" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
                             <div class="potential-item">
                                 <span class="potential-label">Préstamo Máximo</span>
-                                <span id="prestamo-maximo" class="potential-value">65.000 €</span>
+                                <span id="prestamo-maximo" class="potential-value">- €</span>
                             </div>
                             <div class="potential-item">
                                 <span class="potential-label">Margen de Seguridad</span>
-                                <span id="margen-seguridad" class="potential-value">35%</span>
+                                <span id="margen-seguridad" class="potential-value">-</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Ranking de Bancos -->
+                <!-- Gráfico de Dividendos Históricos -->
+                <div class="historico-section">
+                    <h3>📊 Evolución de Dividendos (2019-2023)</h3>
+                    <div class="historico-chart-container">
+                        <canvas id="dividendos-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Ranking Completo IBEX 35 -->
                 <div class="ranking-section">
-                    <h3>Ranking por Rentabilidad por Dividendo</h3>
-                    <div class="ranking-table" id="ranking-table">
-                        <!-- Populated by JS -->
+                    <h3>Ranking IBEX 35 por Rentabilidad por Dividendo</h3>
+                    <div class="ranking-controls">
+                        <span id="ranking-count">35 valores</span>
+                    </div>
+                    <div class="ranking-table-container">
+                        <table class="ranking-table-full" id="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Valor</th>
+                                    <th>Sector</th>
+                                    <th>Yield</th>
+                                    <th>CAGR 5Y</th>
+                                    <th>Consistencia</th>
+                                    <th>LTV Rec.</th>
+                                    <th>Préstamo/100K</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ranking-tbody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -558,15 +598,18 @@
 
         let charts = {
             escenarios: null,
-            proyeccion: null
+            proyeccion: null,
+            dividendos: null
         };
+
+        let ibexData = []; // Cache de datos IBEX 35
 
         // ====================================
         // INITIALIZATION
         // ====================================
         document.addEventListener('DOMContentLoaded', () => {
             initNavigation();
-            initBancoSelector();
+            initSectorSelector();
             calcularTodo();
         });
 
@@ -580,17 +623,39 @@
             });
         }
 
-        function initBancoSelector() {
-            const buttons = document.querySelectorAll('.banco-btn');
+        function initSectorSelector() {
+            const buttons = document.querySelectorAll('.sector-btn');
             buttons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     buttons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    state.tickerActivo = btn.dataset.ticker;
-                    calcularActivo();
-                    calcularEstrategia();
+                    const sector = btn.dataset.sector;
+                    filtrarPorSector(sector);
                 });
             });
+        }
+
+        async function filtrarPorSector(sector) {
+            try {
+                let url = 'api/activos/ibex35';
+                if (sector && sector !== 'todos') {
+                    url = `api/activos/sector/${encodeURIComponent(sector)}`;
+                }
+                
+                const response = await fetch(url);
+                ibexData = await response.json();
+                
+                renderTopValores(ibexData);
+                renderRankingTable(ibexData);
+                document.getElementById('ranking-count').textContent = `${ibexData.length} valores`;
+                
+                // Seleccionar el primero si hay datos
+                if (ibexData.length > 0) {
+                    seleccionarValor(ibexData[0].activo.ticker);
+                }
+            } catch (error) {
+                console.error('Error filtrando por sector:', error);
+            }
         }
 
         // ====================================
@@ -665,64 +730,186 @@
         }
 
         // ====================================
-        // ESTUDIO 2: ACTIVO
+        // ESTUDIO 2: ACTIVO - IBEX 35
         // ====================================
         async function calcularActivo() {
             try {
-                const response = await fetch(`api/activos/analizar/${state.tickerActivo}?inversion=${state.capitalInicial}`);
-                const data = await response.json();
+                // Cargar todos los valores del IBEX 35
+                const response = await fetch(`api/activos/ibex35?inversion=${state.capitalInicial}`);
+                ibexData = await response.json();
                 
-                // Update state
-                state.yieldActivo = parseFloat(data.dividendos.yield.replace('%', '')) / 100;
+                // Render top valores y ranking
+                renderTopValores(ibexData);
+                renderRankingTable(ibexData);
+                document.getElementById('ranking-count').textContent = `${ibexData.length} valores`;
                 
-                // Update UI
-                document.getElementById('activo-nombre').textContent = data.activo.nombre;
-                document.getElementById('activo-ticker').textContent = data.activo.ticker;
-                document.getElementById('activo-precio').textContent = data.activo.precio.toFixed(2) + ' €';
-                document.getElementById('activo-acciones').textContent = formatNumber(data.inversion.num_acciones);
-                document.getElementById('activo-sector').textContent = 'Banca';
-                
-                document.getElementById('activo-yield').textContent = data.dividendos.yield;
-                document.getElementById('dividendos-anuales').textContent = formatCurrency(data.dividendos.total_anual);
-                document.getElementById('dividendo-accion').textContent = data.dividendos.dividendo_por_accion.toFixed(2) + ' €';
-                document.getElementById('dividendos-mensuales').textContent = formatCurrency(data.dividendos.total_mensual);
-                
-                document.getElementById('activo-volatilidad').textContent = data.riesgo.volatilidad;
-                document.getElementById('activo-beta').textContent = data.riesgo.beta;
-                document.getElementById('activo-drawdown').textContent = data.riesgo.max_drawdown_1y;
-                document.getElementById('activo-ltv-rec').textContent = data.riesgo.ltv_recomendado;
-                
-                document.getElementById('prestamo-maximo').textContent = formatCurrency(data.para_lombardo.prestamo_maximo);
-                document.getElementById('margen-seguridad').textContent = data.para_lombardo.margen_seguridad;
-                
-                // Load ranking
-                await cargarRanking();
+                // Seleccionar el primero o el actual
+                const currentTicker = state.tickerActivo || (ibexData[0]?.activo?.ticker);
+                if (currentTicker) {
+                    seleccionarValor(currentTicker);
+                }
                 
             } catch (error) {
                 console.error('Error calculando activo:', error);
             }
         }
 
-        async function cargarRanking() {
-            try {
-                const response = await fetch(`api/activos/ranking-dividendos`);
-                const ranking = await response.json();
-                
-                const container = document.getElementById('ranking-table');
-                container.innerHTML = ranking.map((banco, i) => `
-                    <div class="ranking-row ${banco.ticker === state.tickerActivo ? 'active' : ''}">
-                        <span class="ranking-position">${banco.posicion}</span>
-                        <span class="ranking-name">${banco.nombre}</span>
-                        <span class="ranking-ticker">${banco.ticker}</span>
-                        <span class="ranking-yield">${banco.yield}</span>
-                        <span class="ranking-ltv">${banco.ltv_recomendado}</span>
-                        <span class="ranking-prestamo">${formatCurrency(banco.prestamo_sobre_100k)}</span>
+        function renderTopValores(data) {
+            const container = document.getElementById('top-valores-grid');
+            const top10 = data.slice(0, 10);
+            
+            container.innerHTML = top10.map((item, i) => `
+                <div class="top-valor-card ${item.activo.ticker === state.tickerActivo ? 'selected' : ''}" 
+                     onclick="seleccionarValor('${item.activo.ticker}')">
+                    <div class="top-valor-rank">${i + 1}</div>
+                    <div class="top-valor-info">
+                        <span class="top-valor-nombre">${item.activo.nombre}</span>
+                        <span class="top-valor-sector">${item.activo.sector}</span>
                     </div>
-                `).join('');
+                    <div class="top-valor-yield">
+                        <span class="yield-value">${item.dividendos.yield}</span>
+                        <span class="consistencia-badge ${item.dividendos.consistencia.toLowerCase()}">${item.dividendos.consistencia}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRankingTable(data) {
+            const tbody = document.getElementById('ranking-tbody');
+            
+            tbody.innerHTML = data.map((item, i) => `
+                <tr class="${item.activo.ticker === state.tickerActivo ? 'selected' : ''}"
+                    onclick="seleccionarValor('${item.activo.ticker}')" style="cursor: pointer;">
+                    <td>${i + 1}</td>
+                    <td>
+                        <strong>${item.activo.nombre}</strong><br>
+                        <small>${item.activo.ticker}</small>
+                    </td>
+                    <td>${item.activo.sector}</td>
+                    <td class="yield-cell">${item.dividendos.yield}</td>
+                    <td class="${parseFloat(item.dividendos.crecimiento_cagr) > 0 ? 'positive' : 'negative'}">${item.dividendos.crecimiento_cagr}</td>
+                    <td><span class="consistencia-badge ${item.dividendos.consistencia.toLowerCase()}">${item.dividendos.consistencia}</span></td>
+                    <td>${item.riesgo.ltv_recomendado}</td>
+                    <td>${formatCurrency(item.para_lombardo.prestamo_maximo)}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function seleccionarValor(ticker) {
+            state.tickerActivo = ticker;
+            
+            try {
+                const response = await fetch(`api/activos/analizar/${ticker}?inversion=${state.capitalInicial}`);
+                const data = await response.json();
+                
+                // Update state
+                state.yieldActivo = data.dividendos.yield_valor / 100;
+                
+                // Update UI
+                document.getElementById('activo-nombre').textContent = data.activo.nombre;
+                document.getElementById('activo-ticker').textContent = data.activo.ticker;
+                document.getElementById('activo-precio').textContent = data.activo.precio.toFixed(2) + ' €';
+                document.getElementById('activo-acciones').textContent = formatNumber(data.inversion.num_acciones);
+                document.getElementById('activo-sector').textContent = data.activo.sector;
+                
+                document.getElementById('activo-yield').textContent = data.dividendos.yield;
+                document.getElementById('dividendos-anuales').textContent = formatCurrency(data.dividendos.total_anual);
+                document.getElementById('dividendo-accion').textContent = data.dividendos.dividendo_ultimo.toFixed(2) + ' €';
+                document.getElementById('dividendos-mensuales').textContent = formatCurrency(data.dividendos.total_mensual);
+                document.getElementById('dividendo-cagr').textContent = data.dividendos.crecimiento_cagr;
+                document.getElementById('dividendo-consistencia').textContent = data.dividendos.consistencia;
+                document.getElementById('dividendo-consistencia').className = `consistencia-badge ${data.dividendos.consistencia.toLowerCase()}`;
+                
+                document.getElementById('activo-volatilidad').textContent = data.riesgo.volatilidad;
+                document.getElementById('activo-beta').textContent = data.riesgo.beta;
+                document.getElementById('activo-drawdown').textContent = data.riesgo.max_drawdown_5y;
+                document.getElementById('activo-ltv-rec').textContent = data.riesgo.ltv_recomendado;
+                
+                document.getElementById('prestamo-maximo').textContent = formatCurrency(data.para_lombardo.prestamo_maximo);
+                document.getElementById('margen-seguridad').textContent = data.para_lombardo.margen_seguridad;
+                
+                // Update visual selection
+                document.querySelectorAll('.top-valor-card').forEach(card => {
+                    card.classList.toggle('selected', card.onclick.toString().includes(ticker));
+                });
+                document.querySelectorAll('#ranking-tbody tr').forEach(row => {
+                    row.classList.toggle('selected', row.onclick.toString().includes(ticker));
+                });
+                
+                // Render dividends chart
+                renderDividendosChart(data.dividendos.historico, data.dividendos.años, data.activo.nombre);
+                
+                // Recalcular estrategia
+                calcularEstrategia();
                 
             } catch (error) {
-                console.error('Error cargando ranking:', error);
+                console.error('Error seleccionando valor:', error);
             }
+        }
+
+        function renderDividendosChart(historico, años, nombre) {
+            const ctx = document.getElementById('dividendos-chart').getContext('2d');
+            
+            if (charts.dividendos) {
+                charts.dividendos.destroy();
+            }
+            
+            charts.dividendos = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: años,
+                    datasets: [{
+                        label: 'Dividendo (€/acción)',
+                        data: historico,
+                        backgroundColor: historico.map((v, i) => {
+                            if (i === 0) return 'rgba(245, 158, 11, 0.6)';
+                            const prev = historico[i-1];
+                            if (v > prev) return 'rgba(34, 197, 94, 0.8)';
+                            if (v < prev) return 'rgba(239, 68, 68, 0.8)';
+                            return 'rgba(245, 158, 11, 0.6)';
+                        }),
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: `${nombre} - Dividendos por acción`,
+                            color: '#fff',
+                            font: { size: 14 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.raw.toFixed(2)} €/acción`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#888' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            ticks: { 
+                                color: '#888',
+                                callback: (val) => val.toFixed(2) + ' €'
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function cargarRanking() {
+            // Esta función ahora se llama desde calcularActivo
+            // Mantenida por compatibilidad
         }
 
         // ====================================
@@ -1007,4 +1194,5 @@
     </script>
 </body>
 </html>
+
 

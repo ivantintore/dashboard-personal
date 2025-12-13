@@ -1341,3 +1341,295 @@ body {
     }
 }
 
+/* ============================================
+   IBEX 35 - SELECTOR DE SECTORES
+   ============================================ */
+
+.sector-selector {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    border: 1px solid var(--border-color);
+}
+
+.sector-selector h3 {
+    margin-bottom: var(--space-md);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sector-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.sector-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.875rem;
+}
+
+.sector-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    border-color: var(--accent-gold);
+}
+
+.sector-btn.active {
+    background: linear-gradient(135deg, var(--accent-gold), #d97706);
+    color: #000;
+    border-color: transparent;
+    font-weight: 600;
+}
+
+/* ============================================
+   TOP VALORES GRID
+   ============================================ */
+
+.top-valores-section {
+    margin-bottom: var(--space-xl);
+}
+
+.top-valores-section h3 {
+    margin-bottom: var(--space-md);
+    color: var(--text-primary);
+}
+
+.top-valores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+}
+
+.top-valor-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.top-valor-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+}
+
+.top-valor-card.selected {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+.top-valor-rank {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--accent-gold);
+    font-size: 0.875rem;
+}
+
+.top-valor-card.selected .top-valor-rank {
+    background: var(--accent-gold);
+    color: #000;
+}
+
+.top-valor-info {
+    flex: 1;
+}
+
+.top-valor-nombre {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.top-valor-sector {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.top-valor-yield {
+    text-align: right;
+}
+
+.top-valor-yield .yield-value {
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--accent-green);
+}
+
+/* ============================================
+   CONSISTENCIA BADGE
+   ============================================ */
+
+.consistencia-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.consistencia-badge.excelente {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--accent-green);
+}
+
+.consistencia-badge.buena {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent-primary);
+}
+
+.consistencia-badge.regular {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--accent-gold);
+}
+
+.consistencia-badge.baja {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--accent-red);
+}
+
+/* ============================================
+   CARDS GRID 3 COLUMNS
+   ============================================ */
+
+.cards-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1024px) {
+    .cards-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   HISTORICO CHART
+   ============================================ */
+
+.historico-section {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    border: 1px solid var(--border-color);
+}
+
+.historico-section h3 {
+    margin-bottom: var(--space-lg);
+    color: var(--text-primary);
+}
+
+.historico-chart-container {
+    height: 250px;
+    position: relative;
+}
+
+/* ============================================
+   RANKING TABLE FULL
+   ============================================ */
+
+.ranking-table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+}
+
+.ranking-table-full {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+}
+
+.ranking-table-full thead {
+    background: var(--bg-secondary);
+}
+
+.ranking-table-full th {
+    padding: var(--space-md);
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ranking-table-full td {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.ranking-table-full tbody tr:hover {
+    background: var(--bg-card-hover);
+}
+
+.ranking-table-full tbody tr.selected {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 3px solid var(--accent-gold);
+}
+
+.ranking-table-full .yield-cell {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--accent-green);
+}
+
+.ranking-table-full .positive {
+    color: var(--accent-green);
+}
+
+.ranking-table-full .negative {
+    color: var(--accent-red);
+}
+
+.ranking-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+/* CAGR Value styles */
+.cagr-value {
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+.dividend-breakdown .breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dividend-breakdown .breakdown-item:last-child {
+    border-bottom: none;
+}
+
