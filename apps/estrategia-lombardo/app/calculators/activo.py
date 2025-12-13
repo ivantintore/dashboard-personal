@@ -670,3 +670,189 @@ def comparar_por_sector(sector: str, inversion: float = 100_000) -> list[dict]:
 def comparar_bancos_españoles(inversion: float = 100_000) -> list[dict]:
     """Comparar solo bancos (compatibilidad)"""
     return comparar_por_sector("Banca", inversion)
+
+
+# =============================================================================
+# STRESS TEST - Análisis de resistencia a drawdowns
+# =============================================================================
+
+@dataclass
+class StressTestResult:
+    """Resultado del stress test de un Lombardo"""
+    drawdown_tolerado: float  # Ej: 0.30 = -30%
+    ltv_actual: float
+    ltv_maximo_seguro: float
+    es_seguro: bool
+    margen_seguridad: float
+    escenarios_crisis: list[dict]
+
+
+def calcular_ltv_maximo_por_drawdown(drawdown_tolerado: float) -> float:
+    """
+    Calcula el LTV máximo que puedes usar para tolerar un drawdown dado.
+    
+    Fórmula: Si toleras -30% de drawdown, tu LTV máximo es 70%
+    (porque si el colateral cae 30%, el LTV sube a ~100%)
+    
+    Args:
+        drawdown_tolerado: Caída máxima que quieres tolerar (ej: 0.30 = -30%)
+    
+    Returns:
+        LTV máximo recomendado (ej: 0.70 = 70%)
+    """
+    # Si el colateral cae un X%, el nuevo LTV = LTV_inicial / (1 - X)
+    # Para que el nuevo LTV no supere el 100%, necesitamos:
+    # LTV_inicial / (1 - drawdown) <= 1
+    # LTV_inicial <= 1 - drawdown
+    
+    ltv_maximo = 1 - drawdown_tolerado
+    
+    # Añadir un margen de seguridad del 5% para margin call
+    ltv_maximo_con_margen = ltv_maximo * 0.85  # 85% del máximo teórico
+    
+    return round(ltv_maximo_con_margen, 2)
+
+
+def calcular_drawdown_tolerable(ltv_actual: float) -> float:
+    """
+    Dado un LTV actual, calcula el drawdown máximo que puedes tolerar
+    antes de recibir un margin call.
+    
+    Args:
+        ltv_actual: LTV actual del préstamo (ej: 0.70 = 70%)
+    
+    Returns:
+        Drawdown máximo tolerable (ej: 0.176 = 17.6%)
+    """
+    # Fórmula: caída = 1 - (LTV_actual / LTV_margin_call)
+    # Asumiendo margin call al 85%
+    ltv_margin_call = 0.85
+    
+    if ltv_actual >= ltv_margin_call:
+        return 0  # Ya estás en margin call
+    
+    caida_max = 1 - (ltv_actual / ltv_margin_call)
+    return round(caida_max, 3)
+
+
+def stress_test_lombardo(
+    valor_colateral: float,
+    ltv_actual: float,
+    drawdown_tolerado: float = 0.30
+) -> dict:
+    """
+    Realiza un stress test completo del préstamo lombardo.
+    
+    Args:
+        valor_colateral: Valor actual de las acciones en garantía
+        ltv_actual: LTV actual del préstamo
+        drawdown_tolerado: Drawdown que quieres poder tolerar sin margin call
+    
+    Returns:
+        Diccionario con resultados del stress test
+    """
+    prestamo = valor_colateral * ltv_actual
+    ltv_maximo_seguro = calcular_ltv_maximo_por_drawdown(drawdown_tolerado)
+    drawdown_real_tolerable = calcular_drawdown_tolerable(ltv_actual)
+    
+    # Escenarios de crisis históricos (S&P 500 y crisis similares)
+    crisis_historicas = [
+        {"nombre": "Corrección Normal", "drawdown": 0.10, "año": "Cualquiera"},
+        {"nombre": "Corrección Fuerte", "drawdown": 0.20, "año": "Frecuente"},
+        {"nombre": "Crisis 2022", "drawdown": 0.25, "año": "2022"},
+        {"nombre": "Crisis COVID", "drawdown": 0.34, "año": "2020"},
+        {"nombre": "Crisis 2008", "drawdown": 0.50, "año": "2008"},
+        {"nombre": "Crash 1974", "drawdown": 0.48, "año": "1974"},
+    ]
+    
+    escenarios = []
+    for crisis in crisis_historicas:
+        nuevo_valor_colateral = valor_colateral * (1 - crisis["drawdown"])
+        nuevo_ltv = prestamo / nuevo_valor_colateral if nuevo_valor_colateral > 0 else float('inf')
+        
+        # Estados posibles
+        if nuevo_ltv >= 0.95:
+            estado = "💀 LIQUIDACIÓN"
+            clase = "liquidacion"
+        elif nuevo_ltv >= 0.85:
+            estado = "🚨 MARGIN CALL"
+            clase = "margin-call"
+        elif nuevo_ltv >= 0.80:
+            estado = "⚠️ ALERTA"
+            clase = "alerta"
+        else:
+            estado = "✅ SEGURO"
+            clase = "seguro"
+        
+        # Calcular capital adicional necesario para volver a LTV 70%
+        capital_adicional = 0
+        if nuevo_ltv > 0.70:
+            # Para bajar a LTV 70%, necesitamos que: prestamo / (colateral + X) = 0.70
+            # Entonces: X = prestamo/0.70 - colateral
+            capital_necesario = (prestamo / 0.70) - nuevo_valor_colateral
+            capital_adicional = max(0, capital_necesario)
+        
+        escenarios.append({
+            "crisis": crisis["nombre"],
+            "año_referencia": crisis["año"],
+            "drawdown": f"-{crisis['drawdown']*100:.0f}%",
+            "drawdown_valor": crisis["drawdown"],
+            "valor_colateral_inicial": valor_colateral,
+            "valor_colateral_tras_caida": round(nuevo_valor_colateral, 2),
+            "ltv_resultante": round(nuevo_ltv * 100, 1),
+            "ltv_resultante_pct": f"{nuevo_ltv*100:.1f}%",
+            "estado": estado,
+            "clase": clase,
+            "capital_adicional_necesario": round(capital_adicional, 2),
+            "sobrevives": nuevo_ltv < 0.85
+        })
+    
+    # Determinar si la configuración actual es segura
+    es_seguro = ltv_actual <= ltv_maximo_seguro
+    margen_seguridad = ltv_maximo_seguro - ltv_actual if es_seguro else 0
+    
+    # Recomendaciones
+    if ltv_actual > 0.70:
+        recomendacion = "⚠️ LTV alto. Considera reducir el préstamo o aportar más garantías."
+    elif ltv_actual > 0.60:
+        recomendacion = "📊 LTV moderado. Tienes cierto margen, pero vigila el mercado."
+    elif ltv_actual > 0.50:
+        recomendacion = "✅ LTV conservador. Puedes tolerar correcciones significativas."
+    else:
+        recomendacion = "🛡️ LTV muy conservador. Máxima protección contra crisis."
+    
+    return {
+        "configuracion": {
+            "valor_colateral": valor_colateral,
+            "prestamo": prestamo,
+            "ltv_actual": ltv_actual,
+            "ltv_actual_pct": f"{ltv_actual*100:.0f}%",
+            "drawdown_tolerado_config": drawdown_tolerado,
+            "drawdown_tolerado_config_pct": f"-{drawdown_tolerado*100:.0f}%"
+        },
+        "analisis": {
+            "ltv_maximo_seguro": ltv_maximo_seguro,
+            "ltv_maximo_seguro_pct": f"{ltv_maximo_seguro*100:.0f}%",
+            "drawdown_real_tolerable": drawdown_real_tolerable,
+            "drawdown_real_tolerable_pct": f"-{drawdown_real_tolerable*100:.1f}%",
+            "es_seguro": es_seguro,
+            "margen_seguridad": margen_seguridad,
+            "margen_seguridad_pct": f"{margen_seguridad*100:.1f}%"
+        },
+        "escenarios_crisis": escenarios,
+        "resumen": {
+            "escenarios_que_sobrevives": sum(1 for e in escenarios if e["sobrevives"]),
+            "total_escenarios": len(escenarios),
+            "peor_escenario_seguro": next(
+                (e["crisis"] for e in reversed(escenarios) if e["sobrevives"]), 
+                "Ninguno"
+            ),
+            "recomendacion": recomendacion
+        },
+        "tabla_ltv_drawdown": [
+            {"drawdown": "-20%", "ltv_maximo": "68%", "descripcion": "Correcciones fuertes"},
+            {"drawdown": "-30%", "ltv_maximo": "60%", "descripcion": "Crisis moderadas (COVID)"},
+            {"drawdown": "-40%", "ltv_maximo": "51%", "descripcion": "Crisis severas"},
+            {"drawdown": "-50%", "ltv_maximo": "43%", "descripcion": "Crash total (2008)"},
+        ]
+    }

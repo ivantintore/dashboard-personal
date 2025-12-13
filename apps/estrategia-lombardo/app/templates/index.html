@@ -150,6 +150,63 @@
                     </div>
                 </div>
 
+                <!-- NUEVO: Stress Test -->
+                <div class="stress-test-section">
+                    <div class="stress-header">
+                        <h3>🛡️ Stress Test: ¿Cuánta caída puedes soportar?</h3>
+                        <p>Basado en datos históricos del S&P 500 (1950-2024). El 80% de los años acaban positivos, pero casi todos tienen caídas intra-anuales significativas.</p>
+                    </div>
+                    
+                    <div class="stress-controls">
+                        <div class="stress-selector">
+                            <label>¿Qué drawdown quieres poder tolerar?</label>
+                            <select id="drawdown-tolerado" onchange="calcularStressTest()">
+                                <option value="0.20">-20% (Corrección fuerte)</option>
+                                <option value="0.30" selected>-30% (Crisis moderada como COVID)</option>
+                                <option value="0.40">-40% (Crisis severa)</option>
+                                <option value="0.50">-50% (Crash total como 2008)</option>
+                            </select>
+                        </div>
+                        <div class="stress-result-box">
+                            <span class="stress-result-label">LTV Máximo Recomendado</span>
+                            <span id="ltv-maximo-seguro" class="stress-result-value">60%</span>
+                            <span class="stress-result-desc">Para tolerar <span id="drawdown-seleccionado">-30%</span> sin margin call</span>
+                        </div>
+                    </div>
+
+                    <div class="stress-comparison">
+                        <div class="stress-your-config">
+                            <h4>Tu Configuración Actual</h4>
+                            <div class="config-details">
+                                <div class="config-item">
+                                    <span>LTV Actual</span>
+                                    <span id="stress-ltv-actual" class="config-value">70%</span>
+                                </div>
+                                <div class="config-item">
+                                    <span>Drawdown Tolerable</span>
+                                    <span id="stress-drawdown-real" class="config-value">-17.6%</span>
+                                </div>
+                                <div class="config-item">
+                                    <span id="stress-veredicto" class="veredicto warning">⚠️ Riesgo Moderado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stress-escenarios">
+                        <h4>📊 Simulación de Crisis Históricas</h4>
+                        <p class="escenarios-desc">¿Qué pasaría con tu préstamo en cada escenario?</p>
+                        <div class="escenarios-grid" id="escenarios-crisis-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="stress-recomendacion" id="stress-recomendacion">
+                        <span class="reco-icon">💡</span>
+                        <span class="reco-text">Cargando recomendación...</span>
+                    </div>
+                </div>
+
                 <!-- Comparativa Hipoteca vs Lombardo -->
                 <div class="comparison-section">
                     <h3>Comparativa: Hipoteca vs Lombardo</h3>
@@ -667,7 +724,8 @@
                 calcularLombardo(),
                 calcularActivo(),
                 calcularInversion(),
-                calcularComparativa()
+                calcularComparativa(),
+                calcularStressTest()
             ]);
             await calcularEstrategia();
         }
@@ -685,6 +743,86 @@
             state.ltv = ltv / 100;
             calcularLombardo();
             calcularEstrategia();
+        }
+
+        // ====================================
+        // STRESS TEST
+        // ====================================
+        async function calcularStressTest() {
+            try {
+                const drawdownTolerado = parseFloat(document.getElementById('drawdown-tolerado').value);
+                
+                const params = new URLSearchParams({
+                    valor_colateral: state.capitalInicial,
+                    ltv_actual: state.ltv,
+                    drawdown_tolerado: drawdownTolerado
+                });
+                
+                const response = await fetch(`api/stress-test/analizar?${params}`);
+                const data = await response.json();
+                
+                // Actualizar UI - LTV máximo seguro
+                document.getElementById('ltv-maximo-seguro').textContent = data.analisis.ltv_maximo_seguro_pct;
+                document.getElementById('drawdown-seleccionado').textContent = `-${drawdownTolerado * 100}%`;
+                
+                // Tu configuración
+                document.getElementById('stress-ltv-actual').textContent = data.configuracion.ltv_actual_pct;
+                document.getElementById('stress-drawdown-real').textContent = data.analisis.drawdown_real_tolerable_pct;
+                
+                // Veredicto
+                const veredictoEl = document.getElementById('stress-veredicto');
+                const drawdownReal = data.analisis.drawdown_real_tolerable;
+                
+                if (drawdownReal >= 0.30) {
+                    veredictoEl.textContent = '✅ Configuración Segura';
+                    veredictoEl.className = 'veredicto seguro';
+                } else if (drawdownReal >= 0.20) {
+                    veredictoEl.textContent = '📊 Riesgo Moderado';
+                    veredictoEl.className = 'veredicto moderado';
+                } else if (drawdownReal >= 0.10) {
+                    veredictoEl.textContent = '⚠️ Riesgo Alto';
+                    veredictoEl.className = 'veredicto warning';
+                } else {
+                    veredictoEl.textContent = '🚨 Riesgo Muy Alto';
+                    veredictoEl.className = 'veredicto danger';
+                }
+                
+                // Renderizar escenarios de crisis
+                const escGrid = document.getElementById('escenarios-crisis-grid');
+                escGrid.innerHTML = data.escenarios_crisis.map(esc => `
+                    <div class="escenario-card ${esc.clase}">
+                        <div class="escenario-header">
+                            <span class="escenario-nombre">${esc.crisis}</span>
+                            <span class="escenario-año">${esc.año_referencia}</span>
+                        </div>
+                        <div class="escenario-drawdown">${esc.drawdown}</div>
+                        <div class="escenario-resultado">
+                            <div class="resultado-ltv">
+                                <span>LTV resultante:</span>
+                                <span class="ltv-value ${esc.clase}">${esc.ltv_resultante_pct}</span>
+                            </div>
+                            <div class="resultado-estado">${esc.estado}</div>
+                            ${esc.capital_adicional_necesario > 0 ? `
+                                <div class="capital-necesario">
+                                    <small>Capital adicional: ${formatCurrency(esc.capital_adicional_necesario)}</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Recomendación
+                const recoEl = document.getElementById('stress-recomendacion');
+                recoEl.innerHTML = `
+                    <span class="reco-icon">💡</span>
+                    <span class="reco-text">${data.resumen.recomendacion} 
+                    Sobrevives ${data.resumen.escenarios_que_sobrevives}/${data.resumen.total_escenarios} escenarios.
+                    Peor crisis que toleras: <strong>${data.resumen.peor_escenario_seguro}</strong>.</span>
+                `;
+                
+            } catch (error) {
+                console.error('Error calculando stress test:', error);
+            }
         }
 
         // ====================================

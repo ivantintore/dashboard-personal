@@ -26,7 +26,10 @@ from .calculators.activo import (
     comparar_ibex35,
     comparar_por_sector,
     obtener_sectores,
-    IBEX35_DATOS
+    IBEX35_DATOS,
+    stress_test_lombardo,
+    calcular_ltv_maximo_por_drawdown,
+    calcular_drawdown_tolerable
 )
 from .calculators.inversion import calcular_rentabilidad_total_estrategia, analisis_escenarios
 from .calculators.hipoteca import comparar_hipoteca_vs_lombardo
@@ -366,6 +369,141 @@ async def simulador_estrategia(
             "roi_total": f"{(beneficio_acumulado/capital_inicial)*100:.2f}%",
             "roi_anualizado": f"{(beneficio_acumulado/capital_inicial/años)*100:.2f}%"
         }
+    }
+
+
+# ============================================================================
+# API: STRESS TEST - Análisis de resistencia a drawdowns
+# ============================================================================
+
+@app.get("/api/stress-test/analizar")
+async def analizar_stress_test(
+    valor_colateral: float = 100_000,
+    ltv_actual: float = 0.70,
+    drawdown_tolerado: float = 0.30
+):
+    """
+    Realiza un stress test del préstamo lombardo.
+    
+    Simula diferentes escenarios de crisis (2008, 2020, etc.) y muestra
+    si tu configuración sobreviviría cada uno.
+    
+    - valor_colateral: Valor de las acciones en garantía
+    - ltv_actual: LTV actual del préstamo (0.50-0.80)
+    - drawdown_tolerado: Caída máxima que quieres poder tolerar (-20% a -50%)
+    """
+    return stress_test_lombardo(
+        valor_colateral=valor_colateral,
+        ltv_actual=ltv_actual,
+        drawdown_tolerado=drawdown_tolerado
+    )
+
+
+@app.get("/api/stress-test/ltv-seguro")
+async def calcular_ltv_seguro(drawdown_tolerado: float = 0.30):
+    """
+    Calcula el LTV máximo seguro para tolerar un drawdown dado.
+    
+    Ejemplo: Si quieres tolerar una caída del 30%, el LTV máximo seguro es ~60%
+    
+    - drawdown_tolerado: Caída que quieres poder soportar (0.20, 0.30, 0.40, 0.50)
+    """
+    ltv_maximo = calcular_ltv_maximo_por_drawdown(drawdown_tolerado)
+    
+    return {
+        "drawdown_tolerado": f"-{drawdown_tolerado*100:.0f}%",
+        "ltv_maximo_seguro": ltv_maximo,
+        "ltv_maximo_seguro_pct": f"{ltv_maximo*100:.0f}%",
+        "prestamo_sobre_100k": ltv_maximo * 100_000,
+        "explicacion": f"Para tolerar una caída del {drawdown_tolerado*100:.0f}%, "
+                       f"tu LTV no debería superar el {ltv_maximo*100:.0f}%"
+    }
+
+
+@app.get("/api/stress-test/drawdown-tolerable")
+async def calcular_drawdown_max(ltv_actual: float = 0.70):
+    """
+    Dado un LTV actual, calcula el drawdown máximo que puedes tolerar
+    antes de recibir un margin call.
+    
+    - ltv_actual: LTV actual del préstamo
+    """
+    drawdown_max = calcular_drawdown_tolerable(ltv_actual)
+    
+    # Evaluar el riesgo
+    if drawdown_max >= 0.30:
+        nivel_riesgo = "Bajo"
+        color = "verde"
+    elif drawdown_max >= 0.20:
+        nivel_riesgo = "Moderado"
+        color = "amarillo"
+    elif drawdown_max >= 0.10:
+        nivel_riesgo = "Alto"
+        color = "naranja"
+    else:
+        nivel_riesgo = "Muy Alto"
+        color = "rojo"
+    
+    return {
+        "ltv_actual": f"{ltv_actual*100:.0f}%",
+        "drawdown_tolerable": drawdown_max,
+        "drawdown_tolerable_pct": f"-{drawdown_max*100:.1f}%",
+        "nivel_riesgo": nivel_riesgo,
+        "color": color,
+        "explicacion": f"Con un LTV del {ltv_actual*100:.0f}%, puedes tolerar "
+                       f"una caída máxima del {drawdown_max*100:.1f}% antes del margin call"
+    }
+
+
+@app.get("/api/stress-test/tabla-referencia")
+async def tabla_referencia_stress():
+    """
+    Devuelve la tabla de referencia: qué LTV usar según el drawdown que quieras tolerar.
+    
+    Basado en datos históricos del S&P 500 (1950-2024).
+    """
+    return {
+        "titulo": "Guía de LTV según tolerancia al drawdown",
+        "fuente": "Datos históricos S&P 500 (1950-2024)",
+        "estadisticas_historicas": {
+            "años_analizados": 75,
+            "años_positivos": "80%",
+            "media_drawdown_anual": "-13.8%",
+            "peor_año": {"año": 1974, "drawdown": "-48%"},
+            "segundo_peor": {"año": 2008, "drawdown": "-50%"}
+        },
+        "recomendaciones": [
+            {
+                "perfil": "Muy Conservador",
+                "drawdown_tolerable": "-50%",
+                "ltv_maximo": "43%",
+                "prestamo_sobre_100k": 43000,
+                "descripcion": "Sobrevives cualquier crisis histórica incluyendo 2008"
+            },
+            {
+                "perfil": "Conservador",
+                "drawdown_tolerable": "-40%",
+                "ltv_maximo": "51%",
+                "prestamo_sobre_100k": 51000,
+                "descripcion": "Sobrevives crisis severas como 2022 y COVID"
+            },
+            {
+                "perfil": "Moderado",
+                "drawdown_tolerable": "-30%",
+                "ltv_maximo": "60%",
+                "prestamo_sobre_100k": 60000,
+                "descripcion": "Sobrevives correcciones fuertes y crisis moderadas"
+            },
+            {
+                "perfil": "Agresivo",
+                "drawdown_tolerable": "-20%",
+                "ltv_maximo": "68%",
+                "prestamo_sobre_100k": 68000,
+                "descripcion": "Solo sobrevives correcciones normales"
+            }
+        ],
+        "advertencia": "⚠️ Un LTV superior al 70% es muy arriesgado. "
+                       "Históricamente, casi el 50% de los años tienen drawdowns > 10%"
     }
 
 
