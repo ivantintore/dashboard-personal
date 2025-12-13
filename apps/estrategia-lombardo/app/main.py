@@ -20,7 +20,14 @@ from .calculators import (
     AnalizadorActivo,
     AnalizadorInversion
 )
-from .calculators.activo import comparar_bancos_españoles, ranking_por_rentabilidad_dividendo
+from .calculators.activo import (
+    comparar_bancos_españoles, 
+    ranking_por_rentabilidad_dividendo,
+    comparar_ibex35,
+    comparar_por_sector,
+    obtener_sectores,
+    IBEX35_DATOS
+)
 from .calculators.inversion import calcular_rentabilidad_total_estrategia, analisis_escenarios
 from .calculators.hipoteca import comparar_hipoteca_vs_lombardo
 
@@ -163,6 +170,32 @@ async def comparar_hipoteca_lombardo(
 # API: ESTUDIO 2 - ANÁLISIS DE ACTIVOS
 # ============================================================================
 
+@app.get("/api/activos/ibex35")
+async def listar_ibex35(inversion: float = 100_000, sector: str = None):
+    """
+    Lista todos los valores del IBEX 35 con análisis de dividendos (5 años).
+    Opcionalmente filtra por sector.
+    """
+    if sector:
+        return comparar_por_sector(sector, inversion)
+    return comparar_ibex35(inversion)
+
+
+@app.get("/api/activos/sectores")
+async def listar_sectores():
+    """Lista los sectores disponibles del IBEX 35"""
+    return {
+        "sectores": obtener_sectores(),
+        "total_valores": len(IBEX35_DATOS)
+    }
+
+
+@app.get("/api/activos/sector/{sector}")
+async def activos_por_sector(sector: str, inversion: float = 100_000):
+    """Lista valores de un sector específico del IBEX 35"""
+    return comparar_por_sector(sector, inversion)
+
+
 @app.get("/api/activos/bancos-españoles")
 async def listar_bancos(inversion: float = 100_000):
     """Compara los principales bancos españoles como inversión"""
@@ -170,9 +203,9 @@ async def listar_bancos(inversion: float = 100_000):
 
 
 @app.get("/api/activos/ranking-dividendos")
-async def ranking_dividendos():
-    """Ranking de bancos por rentabilidad por dividendo"""
-    return ranking_por_rentabilidad_dividendo()
+async def ranking_dividendos(top: int = None):
+    """Ranking de valores IBEX 35 por rentabilidad por dividendo (últimos 5 años)"""
+    return ranking_por_rentabilidad_dividendo(top_n=top)
 
 
 @app.get("/api/activos/analizar/{ticker}")
